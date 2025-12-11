@@ -7,7 +7,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 import { createClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
-import { buffer } from "micro"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2023-10-16",
@@ -25,12 +24,22 @@ export const config = {
     },
 }
 
+// Helper to get raw body
+async function getRawBody(req: VercelRequest): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        const chunks: Buffer[] = []
+        req.on('data', (chunk: Buffer) => chunks.push(chunk))
+        req.on('end', () => resolve(Buffer.concat(chunks)))
+        req.on('error', reject)
+    })
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" })
     }
 
-    const buf = await buffer(req)
+    const buf = await getRawBody(req)
     const sig = req.headers["stripe-signature"]
 
     let event: Stripe.Event
