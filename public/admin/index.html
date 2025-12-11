@@ -469,6 +469,129 @@
             border-color: var(--primary);
             color: var(--primary);
         }
+
+        /* File upload */
+        .file-upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+
+        .file-upload-area:hover {
+            border-color: var(--primary);
+            background: #f8fff8;
+        }
+
+        .file-upload-area.dragover {
+            border-color: var(--primary);
+            background: #e8f5e9;
+        }
+
+        .file-upload-area input[type="file"] {
+            display: none;
+        }
+
+        .upload-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .upload-text strong {
+            color: var(--primary);
+        }
+
+        .image-preview {
+            position: relative;
+            display: inline-block;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+        }
+
+        .image-preview .remove-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 12px;
+            margin-top: 15px;
+        }
+
+        .gallery-item {
+            position: relative;
+            aspect-ratio: 4/3;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--bg);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .gallery-item .remove-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .gallery-item:hover .remove-btn {
+            opacity: 1;
+        }
+
+        .upload-progress {
+            margin-top: 10px;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .upload-progress .spinner-small {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
     </style>
 </head>
 <body>
@@ -561,26 +684,32 @@
                         </div>
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="endDate">Data zakończenia</label>
-                            <input type="date" id="endDate">
-                        </div>
-                        <div class="form-group">
-                            <label for="imageUrl">URL głównego obrazka</label>
-                            <input type="url" id="imageUrl" placeholder="https://...">
-                        </div>
+                    <div class="form-group">
+                        <label for="endDate">Data zakończenia</label>
+                        <input type="date" id="endDate">
                     </div>
 
                     <div class="form-group">
-                        <label>Dodatkowe zdjęcia (galeria)</label>
-                        <div id="imagesList" class="images-list"></div>
-                        <button type="button" class="btn-add-image" onclick="addImageField()">
-                            + Dodaj zdjęcie
-                        </button>
-                        <small style="color: var(--text-light); display: block; margin-top: 8px;">
-                            Dodaj URLe do zdjęć, które pojawią się w galerii pod opisem
-                        </small>
+                        <label>Główne zdjęcie</label>
+                        <div id="mainImagePreview"></div>
+                        <div class="file-upload-area" id="mainImageUpload">
+                            <input type="file" id="mainImageInput" accept="image/*">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text"><strong>Kliknij</strong> lub przeciągnij zdjęcie</div>
+                        </div>
+                        <div id="mainImageProgress" class="upload-progress hidden"></div>
+                        <input type="hidden" id="imageUrl">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Galeria zdjęć</label>
+                        <div id="galleryPreview" class="gallery-grid"></div>
+                        <div class="file-upload-area" id="galleryUpload">
+                            <input type="file" id="galleryInput" accept="image/*" multiple>
+                            <div class="upload-icon">🖼️</div>
+                            <div class="upload-text"><strong>Kliknij</strong> lub przeciągnij zdjęcia (można wybrać wiele)</div>
+                        </div>
+                        <div id="galleryProgress" class="upload-progress hidden"></div>
                     </div>
 
                     <div class="form-row">
@@ -666,6 +795,9 @@
 
             // Logout
             document.getElementById('logoutBtn').addEventListener('click', logout);
+
+            // Initialize file uploads
+            initFileUploads();
         });
 
         // Login
@@ -807,44 +939,177 @@
             document.getElementById('showDonors').checked = campaign?.show_donors !== false;
             document.getElementById('isActive').checked = campaign?.is_active !== false;
 
-            // Load additional images
+            // Load images
             currentImages = campaign?.images || [];
-            renderImagesList();
+            renderMainImagePreview(campaign?.image_url || '');
+            renderGalleryPreview();
 
             document.getElementById('isActiveGroup').classList.toggle('hidden', !campaign);
 
             campaignModal.classList.remove('hidden');
         }
 
-        // Images management
-        function renderImagesList() {
-            const container = document.getElementById('imagesList');
-            container.innerHTML = currentImages.map((url, index) => `
-                <div class="image-item">
-                    <img src="${escapeHtml(url)}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23eee%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2214%22>Brak</text></svg>'">
-                    <input type="url" value="${escapeHtml(url)}" onchange="updateImage(${index}, this.value)" placeholder="https://...">
-                    <button type="button" class="btn-remove" onclick="removeImage(${index})">&times;</button>
+        // File upload functionality
+        function initFileUploads() {
+            // Main image upload
+            const mainUploadArea = document.getElementById('mainImageUpload');
+            const mainInput = document.getElementById('mainImageInput');
+
+            mainUploadArea.addEventListener('click', () => mainInput.click());
+            mainInput.addEventListener('change', (e) => handleMainImageUpload(e.target.files[0]));
+
+            // Drag and drop for main image
+            mainUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                mainUploadArea.classList.add('dragover');
+            });
+            mainUploadArea.addEventListener('dragleave', () => {
+                mainUploadArea.classList.remove('dragover');
+            });
+            mainUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                mainUploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files[0]) {
+                    handleMainImageUpload(e.dataTransfer.files[0]);
+                }
+            });
+
+            // Gallery upload
+            const galleryUploadArea = document.getElementById('galleryUpload');
+            const galleryInput = document.getElementById('galleryInput');
+
+            galleryUploadArea.addEventListener('click', () => galleryInput.click());
+            galleryInput.addEventListener('change', (e) => handleGalleryUpload(e.target.files));
+
+            // Drag and drop for gallery
+            galleryUploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                galleryUploadArea.classList.add('dragover');
+            });
+            galleryUploadArea.addEventListener('dragleave', () => {
+                galleryUploadArea.classList.remove('dragover');
+            });
+            galleryUploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                galleryUploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files.length > 0) {
+                    handleGalleryUpload(e.dataTransfer.files);
+                }
+            });
+        }
+
+        async function uploadImage(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = async () => {
+                    try {
+                        const response = await fetch(`${apiUrl}/upload`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-API-Key': apiKey
+                            },
+                            body: JSON.stringify({
+                                image: reader.result,
+                                filename: file.name,
+                                contentType: file.type
+                            })
+                        });
+
+                        const data = await response.json();
+                        if (response.ok) {
+                            resolve(data.url);
+                        } else {
+                            reject(new Error(data.error || 'Upload failed'));
+                        }
+                    } catch (err) {
+                        reject(err);
+                    }
+                };
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleMainImageUpload(file) {
+            if (!file) return;
+
+            const progress = document.getElementById('mainImageProgress');
+            progress.classList.remove('hidden');
+            progress.innerHTML = '<span class="spinner-small"></span> Wgrywanie...';
+
+            try {
+                const url = await uploadImage(file);
+                document.getElementById('imageUrl').value = url;
+                renderMainImagePreview(url);
+                showToast('Zdjęcie wgrane', 'success');
+            } catch (err) {
+                showToast('Błąd wgrywania: ' + err.message, 'error');
+            } finally {
+                progress.classList.add('hidden');
+            }
+        }
+
+        async function handleGalleryUpload(files) {
+            if (!files || files.length === 0) return;
+
+            const progress = document.getElementById('galleryProgress');
+            progress.classList.remove('hidden');
+
+            let uploaded = 0;
+            const total = files.length;
+
+            for (const file of files) {
+                progress.innerHTML = `<span class="spinner-small"></span> Wgrywanie ${uploaded + 1}/${total}...`;
+                try {
+                    const url = await uploadImage(file);
+                    currentImages.push(url);
+                    uploaded++;
+                } catch (err) {
+                    showToast(`Błąd wgrywania ${file.name}: ${err.message}`, 'error');
+                }
+            }
+
+            progress.classList.add('hidden');
+            renderGalleryPreview();
+
+            if (uploaded > 0) {
+                showToast(`Wgrano ${uploaded} zdjęć`, 'success');
+            }
+        }
+
+        function renderMainImagePreview(url) {
+            const preview = document.getElementById('mainImagePreview');
+            if (url) {
+                preview.innerHTML = `
+                    <div class="image-preview">
+                        <img src="${escapeHtml(url)}" alt="Główne zdjęcie">
+                        <button type="button" class="remove-btn" onclick="removeMainImage()">&times;</button>
+                    </div>
+                `;
+            } else {
+                preview.innerHTML = '';
+            }
+        }
+
+        function removeMainImage() {
+            document.getElementById('imageUrl').value = '';
+            renderMainImagePreview(null);
+        }
+
+        function renderGalleryPreview() {
+            const preview = document.getElementById('galleryPreview');
+            preview.innerHTML = currentImages.map((url, index) => `
+                <div class="gallery-item">
+                    <img src="${escapeHtml(url)}" alt="Zdjęcie ${index + 1}">
+                    <button type="button" class="remove-btn" onclick="removeGalleryImage(${index})">&times;</button>
                 </div>
             `).join('');
         }
 
-        function addImageField() {
-            currentImages.push('');
-            renderImagesList();
-            // Focus on the new input
-            const inputs = document.querySelectorAll('#imagesList input');
-            if (inputs.length > 0) {
-                inputs[inputs.length - 1].focus();
-            }
-        }
-
-        function updateImage(index, value) {
-            currentImages[index] = value;
-        }
-
-        function removeImage(index) {
+        function removeGalleryImage(index) {
             currentImages.splice(index, 1);
-            renderImagesList();
+            renderGalleryPreview();
         }
 
         // Close modal
