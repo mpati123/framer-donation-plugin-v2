@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LupusUrsus Donations - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #4CAF50;
+            --primary-dark: #388E3C;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --text: #1a1a1a;
+            --text-light: #666;
+            --border: #e0e0e0;
+            --bg: #f5f5f5;
+            --white: #ffffff;
+            --shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--white);
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .header p {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        /* Login Form */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: var(--white);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+        }
+
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .btn-block {
+            display: block;
+            width: 100%;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            border: none;
+            background: none;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-light);
+            border-radius: 6px;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--white);
+            border-radius: 8px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .card-body {
+            padding: 20px;
+        }
+
+        /* Table */
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .table th {
+            font-weight: 600;
+            font-size: 12px;
+            text-transform: uppercase;
+            color: var(--text-light);
+        }
+
+        .table tr:hover {
+            background: var(--bg);
+        }
+
+        /* Progress bar */
+        .progress {
+            height: 8px;
+            background: var(--border);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--primary);
+            border-radius: 4px;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-active {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-inactive {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge-archived {
+            background: #f5f5f5;
+            color: #757575;
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal {
+            background: var(--white);
+            border-radius: 8px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-body {
+            padding: 20px;
+        }
+
+        .modal-footer {
+            padding: 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            background: var(--text);
+            color: white;
+            border-radius: 6px;
+            box-shadow: var(--shadow);
+            z-index: 2000;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success {
+            background: var(--primary);
+        }
+
+        .toast.error {
+            background: var(--danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--border);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .table {
+                font-size: 12px;
+            }
+
+            .table th,
+            .table td {
+                padding: 8px;
+            }
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <h2>🐺 LupusUrsus Admin</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="apiUrl">API URL</label>
+                    <input type="url" id="apiUrl" placeholder="https://your-app.vercel.app/api" required>
+                </div>
+                <div class="form-group">
+                    <label for="apiKey">API Key</label>
+                    <input type="password" id="apiKey" placeholder="Twój klucz API" required>
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">Zaloguj się</button>
+            </form>
+            <p style="margin-top: 20px; font-size: 12px; color: var(--text-light); text-align: center;">
+                API Key znajdziesz w zmiennych środowiskowych Vercel (ADMIN_API_KEY)
+            </p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <div class="header">
+            <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <h1>🐺 LupusUrsus Donations</h1>
+                    <p>Panel administracyjny</p>
+                </div>
+                <button id="logoutBtn" class="btn btn-secondary btn-small">Wyloguj</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" data-tab="active">Aktywne</button>
+                <button class="tab" data-tab="inactive">Nieaktywne</button>
+                <button class="tab" data-tab="archived">Archiwum</button>
+            </div>
+
+            <!-- Campaigns Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3>Zbiórki</h3>
+                    <button id="addCampaignBtn" class="btn btn-primary btn-small">+ Nowa zbiórka</button>
+                </div>
+                <div class="card-body" id="campaignsContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p>Ładowanie zbiórek...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campaign Modal -->
+    <div id="campaignModal" class="modal-overlay hidden">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modalTitle">Nowa zbiórka</h3>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="campaignForm">
+                    <input type="hidden" id="campaignId">
+
+                    <div class="form-group">
+                        <label for="title">Tytuł *</label>
+                        <input type="text" id="title" required placeholder="np. Operacja dla Burka">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Opis</label>
+                        <textarea id="description" placeholder="Opisz cel zbiórki..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="goalAmount">Cel (zł) *</label>
+                            <input type="number" id="goalAmount" required min="1" placeholder="5000">
+                        </div>
+                        <div class="form-group">
+                            <label for="beneficiary">Beneficjent</label>
+                            <input type="text" id="beneficiary" placeholder="np. Burek - 5-letni kundelek">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="endDate">Data zakończenia</label>
+                            <input type="date" id="endDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="imageUrl">URL obrazka</label>
+                            <input type="url" id="imageUrl" placeholder="https://...">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="progressStyle">Styl paska</label>
+                            <select id="progressStyle">
+                                <option value="default">Domyślny</option>
+                                <option value="striped">W paski</option>
+                                <option value="animated">Animowany</option>
+                                <option value="gradient">Gradient</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="progressColor">Kolor paska</label>
+                            <input type="color" id="progressColor" value="#4CAF50">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="showDonors" checked>
+                            Pokazuj listę darczyńców
+                        </label>
+                    </div>
+
+                    <div class="form-group" id="isActiveGroup">
+                        <label>
+                            <input type="checkbox" id="isActive" checked>
+                            Zbiórka aktywna
+                        </label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Anuluj</button>
+                <button type="button" class="btn btn-primary" onclick="saveCampaign()">Zapisz</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let apiUrl = '';
+        let apiKey = '';
+        let campaigns = [];
+        let currentTab = 'active';
+        let editingCampaign = null;
+
+        // DOM Elements
+        const loginScreen = document.getElementById('loginScreen');
+        const mainApp = document.getElementById('mainApp');
+        const campaignsContainer = document.getElementById('campaignsContainer');
+        const campaignModal = document.getElementById('campaignModal');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check saved credentials
+            const savedUrl = localStorage.getItem('lupusursus_api_url');
+            const savedKey = localStorage.getItem('lupusursus_api_key');
+
+            if (savedUrl && savedKey) {
+                apiUrl = savedUrl;
+                apiKey = savedKey;
+                showMainApp();
+            }
+
+            // Login form
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+
+            // Tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentTab = tab.dataset.tab;
+                    loadCampaigns();
+                });
+            });
+
+            // Add campaign button
+            document.getElementById('addCampaignBtn').addEventListener('click', () => openModal());
+
+            // Logout
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        });
+
+        // Login
+        async function handleLogin(e) {
+            e.preventDefault();
+
+            apiUrl = document.getElementById('apiUrl').value.replace(/\/$/, '');
+            apiKey = document.getElementById('apiKey').value;
+
+            try {
+                // Test connection
+                const response = await fetch(`${apiUrl}/campaigns?limit=1`, {
+                    headers: { 'X-API-Key': apiKey }
+                });
+
+                if (response.ok) {
+                    localStorage.setItem('lupusursus_api_url', apiUrl);
+                    localStorage.setItem('lupusursus_api_key', apiKey);
+                    showMainApp();
+                } else {
+                    showToast('Błąd autoryzacji. Sprawdź dane.', 'error');
+                }
+            } catch (err) {
+                showToast('Nie można połączyć z API.', 'error');
+            }
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('lupusursus_api_url');
+            localStorage.removeItem('lupusursus_api_key');
+            apiUrl = '';
+            apiKey = '';
+            loginScreen.classList.remove('hidden');
+            mainApp.classList.add('hidden');
+        }
+
+        // Show main app
+        function showMainApp() {
+            loginScreen.classList.add('hidden');
+            mainApp.classList.remove('hidden');
+            loadCampaigns();
+        }
+
+        // Load campaigns
+        async function loadCampaigns() {
+            campaignsContainer.innerHTML = '<div class="loading"><div class="spinner"></div><p>Ładowanie zbiórek...</p></div>';
+
+            try {
+                const response = await fetch(`${apiUrl}/campaigns?status=${currentTab}&limit=100`, {
+                    headers: { 'X-API-Key': apiKey }
+                });
+
+                const data = await response.json();
+                campaigns = data.campaigns || [];
+
+                renderCampaigns();
+            } catch (err) {
+                campaignsContainer.innerHTML = '<div class="empty-state"><p>Błąd ładowania zbiórek</p></div>';
+            }
+        }
+
+        // Render campaigns table
+        function renderCampaigns() {
+            if (campaigns.length === 0) {
+                campaignsContainer.innerHTML = `
+                    <div class="empty-state">
+                        <p>Brak zbiórek w tej kategorii</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const html = `
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Tytuł</th>
+                            <th>Postęp</th>
+                            <th>Zebrano</th>
+                            <th>Cel</th>
+                            <th>Status</th>
+                            <th>Akcje</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${campaigns.map(c => `
+                            <tr>
+                                <td>
+                                    <strong>${escapeHtml(c.title)}</strong>
+                                    ${c.beneficiary ? `<br><small style="color: var(--text-light)">${escapeHtml(c.beneficiary)}</small>` : ''}
+                                </td>
+                                <td style="min-width: 120px">
+                                    <div class="progress">
+                                        <div class="progress-bar" style="width: ${c.percentage}%; background: ${c.progress_color}"></div>
+                                    </div>
+                                    <small>${c.percentage}%</small>
+                                </td>
+                                <td>${formatCurrency(c.collected_amount)}</td>
+                                <td>${formatCurrency(c.goal_amount)}</td>
+                                <td>
+                                    ${c.archived_at
+                                        ? '<span class="badge badge-archived">Archiwum</span>'
+                                        : c.is_active
+                                            ? '<span class="badge badge-active">Aktywna</span>'
+                                            : '<span class="badge badge-inactive">Nieaktywna</span>'
+                                    }
+                                </td>
+                                <td>
+                                    <button class="btn btn-secondary btn-small" onclick="editCampaign('${c.id}')">Edytuj</button>
+                                    ${c.archived_at
+                                        ? `<button class="btn btn-small" style="background: var(--primary); color: white;" onclick="restoreCampaign('${c.id}')">Przywróć</button>`
+                                        : `<button class="btn btn-danger btn-small" onclick="archiveCampaign('${c.id}')">Archiwizuj</button>`
+                                    }
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            campaignsContainer.innerHTML = html;
+        }
+
+        // Open modal
+        function openModal(campaign = null) {
+            editingCampaign = campaign;
+
+            document.getElementById('modalTitle').textContent = campaign ? 'Edytuj zbiórkę' : 'Nowa zbiórka';
+            document.getElementById('campaignId').value = campaign?.id || '';
+            document.getElementById('title').value = campaign?.title || '';
+            document.getElementById('description').value = campaign?.description || '';
+            document.getElementById('goalAmount').value = campaign?.goal_amount || '';
+            document.getElementById('beneficiary').value = campaign?.beneficiary || '';
+            document.getElementById('endDate').value = campaign?.end_date?.split('T')[0] || '';
+            document.getElementById('imageUrl').value = campaign?.image_url || '';
+            document.getElementById('progressStyle').value = campaign?.progress_style || 'default';
+            document.getElementById('progressColor').value = campaign?.progress_color || '#4CAF50';
+            document.getElementById('showDonors').checked = campaign?.show_donors !== false;
+            document.getElementById('isActive').checked = campaign?.is_active !== false;
+
+            document.getElementById('isActiveGroup').classList.toggle('hidden', !campaign);
+
+            campaignModal.classList.remove('hidden');
+        }
+
+        // Close modal
+        function closeModal() {
+            campaignModal.classList.add('hidden');
+            editingCampaign = null;
+        }
+
+        // Edit campaign
+        function editCampaign(id) {
+            const campaign = campaigns.find(c => c.id === id);
+            if (campaign) {
+                openModal(campaign);
+            }
+        }
+
+        // Save campaign
+        async function saveCampaign() {
+            const id = document.getElementById('campaignId').value;
+            const data = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value || null,
+                goal_amount: parseFloat(document.getElementById('goalAmount').value),
+                beneficiary: document.getElementById('beneficiary').value || null,
+                end_date: document.getElementById('endDate').value || null,
+                image_url: document.getElementById('imageUrl').value || null,
+                progress_style: document.getElementById('progressStyle').value,
+                progress_color: document.getElementById('progressColor').value,
+                show_donors: document.getElementById('showDonors').checked,
+            };
+
+            if (id) {
+                data.is_active = document.getElementById('isActive').checked;
+            }
+
+            try {
+                const response = await fetch(
+                    id ? `${apiUrl}/campaigns/${id}` : `${apiUrl}/campaigns`,
+                    {
+                        method: id ? 'PUT' : 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-Key': apiKey
+                        },
+                        body: JSON.stringify(data)
+                    }
+                );
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showToast(id ? 'Zbiórka zaktualizowana' : 'Zbiórka utworzona', 'success');
+                    closeModal();
+                    loadCampaigns();
+                } else {
+                    showToast(result.error || 'Błąd zapisu', 'error');
+                }
+            } catch (err) {
+                showToast('Błąd połączenia', 'error');
+            }
+        }
+
+        // Archive campaign
+        async function archiveCampaign(id) {
+            if (!confirm('Czy na pewno chcesz zarchiwizować tę zbiórkę?')) return;
+
+            try {
+                const response = await fetch(`${apiUrl}/campaigns/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'X-API-Key': apiKey }
+                });
+
+                if (response.ok) {
+                    showToast('Zbiórka zarchiwizowana', 'success');
+                    loadCampaigns();
+                } else {
+                    const result = await response.json();
+                    showToast(result.error || 'Błąd archiwizacji', 'error');
+                }
+            } catch (err) {
+                showToast('Błąd połączenia', 'error');
+            }
+        }
+
+        // Restore campaign
+        async function restoreCampaign(id) {
+            try {
+                const response = await fetch(`${apiUrl}/campaigns/${id}?restore=true`, {
+                    method: 'DELETE',
+                    headers: { 'X-API-Key': apiKey }
+                });
+
+                if (response.ok) {
+                    showToast('Zbiórka przywrócona', 'success');
+                    loadCampaigns();
+                } else {
+                    const result = await response.json();
+                    showToast(result.error || 'Błąd przywracania', 'error');
+                }
+            } catch (err) {
+                showToast('Błąd połączenia', 'error');
+            }
+        }
+
+        // Show toast
+        function showToast(message, type = '') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Helpers
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('pl-PL', {
+                style: 'decimal',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount) + ' zł';
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>
