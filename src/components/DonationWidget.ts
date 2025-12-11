@@ -9,6 +9,7 @@ interface Campaign {
     description: string
     excerpt: string
     image_url: string
+    images: string[] // Additional gallery images
     goal_amount: number
     collected_amount: number
     donations_count: number
@@ -38,6 +39,7 @@ interface Props {
     showDescription?: boolean
     showBeneficiary?: boolean
     showSupportButton?: boolean
+    showGallery?: boolean
     // Form options
     amounts?: number[]
     showCustomAmount?: boolean
@@ -96,6 +98,7 @@ export default function DonationWidget({
     showDescription = true,
     showBeneficiary = true,
     showSupportButton = true,
+    showGallery = true,
     // Form
     amounts = [20, 50, 100, 200],
     showCustomAmount = true,
@@ -310,6 +313,31 @@ export default function DonationWidget({
                             <p style={{ fontSize: 14, color: "#666", lineHeight: 1.5, margin: "0 0 16px 0" }}>
                                 {campaign.excerpt || campaign.description?.substring(0, 150)}...
                             </p>
+                        )}
+                        {/* Image Gallery */}
+                        {showGallery && campaign.images && campaign.images.length > 0 && (
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: campaign.images.length === 1 ? "1fr" : "repeat(2, 1fr)",
+                                gap: 8,
+                                marginTop: 16,
+                            }}>
+                                {campaign.images.map((imgUrl, index) => (
+                                    <div
+                                        key={index}
+                                        style={{
+                                            width: "100%",
+                                            height: campaign.images.length === 1 ? 200 : 120,
+                                            backgroundImage: \`url(\${imgUrl})\`,
+                                            backgroundSize: "cover",
+                                            backgroundPosition: "center",
+                                            borderRadius: 8,
+                                            cursor: "pointer",
+                                        }}
+                                        onClick={() => window.open(imgUrl, "_blank")}
+                                    />
+                                ))}
+                            </div>
                         )}
                     </div>
                 </div>
@@ -541,6 +569,7 @@ addPropertyControls(DonationWidget, {
     showDescription: { type: ControlType.Boolean, title: "Pokaż opis", defaultValue: true, hidden: (props) => !props.showCard },
     showBeneficiary: { type: ControlType.Boolean, title: "Pokaż beneficjenta", defaultValue: true, hidden: (props) => !props.showCard },
     showSupportButton: { type: ControlType.Boolean, title: "Przycisk Wesprzyj", defaultValue: true, hidden: (props) => !props.showCard || !props.showForm },
+    showGallery: { type: ControlType.Boolean, title: "Pokaż galerię", defaultValue: true, hidden: (props) => !props.showCard },
 
     amounts: { type: ControlType.Array, title: "Kwoty", control: { type: ControlType.Number }, defaultValue: [20, 50, 100, 200], hidden: (props) => !props.showForm },
     showCustomAmount: { type: ControlType.Boolean, title: "Własna kwota", defaultValue: true, hidden: (props) => !props.showForm },

@@ -407,6 +407,68 @@
         .hidden {
             display: none !important;
         }
+
+        /* Images management */
+        .images-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .image-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            background: var(--bg);
+            border-radius: 6px;
+        }
+
+        .image-item img {
+            width: 60px;
+            height: 40px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .image-item input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .image-item .btn-remove {
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn-add-image {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px;
+            background: var(--bg);
+            border: 2px dashed var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            color: var(--text-light);
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .btn-add-image:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
     </style>
 </head>
 <body>
@@ -505,9 +567,20 @@
                             <input type="date" id="endDate">
                         </div>
                         <div class="form-group">
-                            <label for="imageUrl">URL obrazka</label>
+                            <label for="imageUrl">URL głównego obrazka</label>
                             <input type="url" id="imageUrl" placeholder="https://...">
                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Dodatkowe zdjęcia (galeria)</label>
+                        <div id="imagesList" class="images-list"></div>
+                        <button type="button" class="btn-add-image" onclick="addImageField()">
+                            + Dodaj zdjęcie
+                        </button>
+                        <small style="color: var(--text-light); display: block; margin-top: 8px;">
+                            Dodaj URLe do zdjęć, które pojawią się w galerii pod opisem
+                        </small>
                     </div>
 
                     <div class="form-row">
@@ -555,6 +628,7 @@
         let campaigns = [];
         let currentTab = 'active';
         let editingCampaign = null;
+        let currentImages = []; // Array of additional image URLs
 
         // DOM Elements
         const loginScreen = document.getElementById('loginScreen');
@@ -733,9 +807,44 @@
             document.getElementById('showDonors').checked = campaign?.show_donors !== false;
             document.getElementById('isActive').checked = campaign?.is_active !== false;
 
+            // Load additional images
+            currentImages = campaign?.images || [];
+            renderImagesList();
+
             document.getElementById('isActiveGroup').classList.toggle('hidden', !campaign);
 
             campaignModal.classList.remove('hidden');
+        }
+
+        // Images management
+        function renderImagesList() {
+            const container = document.getElementById('imagesList');
+            container.innerHTML = currentImages.map((url, index) => `
+                <div class="image-item">
+                    <img src="${escapeHtml(url)}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23eee%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23999%22 font-size=%2214%22>Brak</text></svg>'">
+                    <input type="url" value="${escapeHtml(url)}" onchange="updateImage(${index}, this.value)" placeholder="https://...">
+                    <button type="button" class="btn-remove" onclick="removeImage(${index})">&times;</button>
+                </div>
+            `).join('');
+        }
+
+        function addImageField() {
+            currentImages.push('');
+            renderImagesList();
+            // Focus on the new input
+            const inputs = document.querySelectorAll('#imagesList input');
+            if (inputs.length > 0) {
+                inputs[inputs.length - 1].focus();
+            }
+        }
+
+        function updateImage(index, value) {
+            currentImages[index] = value;
+        }
+
+        function removeImage(index) {
+            currentImages.splice(index, 1);
+            renderImagesList();
         }
 
         // Close modal
@@ -755,6 +864,9 @@
         // Save campaign
         async function saveCampaign() {
             const id = document.getElementById('campaignId').value;
+            // Filter out empty image URLs
+            const validImages = currentImages.filter(url => url && url.trim() !== '');
+
             const data = {
                 title: document.getElementById('title').value,
                 description: document.getElementById('description').value || null,
@@ -762,6 +874,7 @@
                 beneficiary: document.getElementById('beneficiary').value || null,
                 end_date: document.getElementById('endDate').value || null,
                 image_url: document.getElementById('imageUrl').value || null,
+                images: validImages,
                 progress_style: document.getElementById('progressStyle').value,
                 progress_color: document.getElementById('progressColor').value,
                 show_donors: document.getElementById('showDonors').checked,

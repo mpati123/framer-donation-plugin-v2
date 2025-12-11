@@ -17,6 +17,7 @@ CREATE TABLE campaigns (
     description TEXT,
     excerpt TEXT,
     image_url TEXT,
+    images JSONB DEFAULT '[]'::jsonb, -- Array of additional image URLs
 
     -- Campaign details
     beneficiary TEXT,
@@ -47,7 +48,9 @@ CREATE TABLE campaigns (
 -- If you already have the tables and need to add missing columns, run:
 --
 -- ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS external_url TEXT;
+-- ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
 -- ALTER TABLE donations ADD COLUMN IF NOT EXISTS stripe_payment_intent TEXT;
+-- ALTER TABLE donations ADD COLUMN IF NOT EXISTS is_anonymous BOOLEAN DEFAULT false;
 -- CREATE INDEX IF NOT EXISTS idx_donations_stripe_payment_intent ON donations(stripe_payment_intent);
 
 -- ============================================
