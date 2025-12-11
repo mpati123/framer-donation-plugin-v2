@@ -283,11 +283,38 @@ export default function DonationWidget({
                     )}
                     <div style={{ padding: 24 }}>
                         <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, margin: 0 }}>{campaign.title}</h3>
+                        {showBeneficiary && campaign.beneficiary && (
+                            <p style={{ fontSize: 14, color: primaryColor, marginBottom: 12, margin: "8px 0 12px 0" }}>
+                                Dla: {campaign.beneficiary}
+                            </p>
+                        )}
+                        {/* Progress Bar inside card */}
+                        {showProgress && (
+                            <div style={{ marginBottom: 16 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 14 }}>
+                                    <span style={{ fontWeight: 700 }}>{formatCurrency(campaign.collected_amount)}</span>
+                                    <span style={{ color: "#666" }}>z {formatCurrency(campaign.goal_amount)}</span>
+                                </div>
+                                <div style={{ height: 12, background: "#e5e7eb", borderRadius: 6, overflow: "hidden" }}>
+                                    <div style={{
+                                        height: "100%",
+                                        width: \`\${Math.min(percentage, 100)}%\`,
+                                        background: primaryColor,
+                                        borderRadius: 6,
+                                        transition: "width 0.8s ease-out",
+                                    }} />
+                                </div>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 12, color: "#666" }}>
+                                    <span style={{ fontWeight: 600, color: primaryColor }}>{percentage}%</span>
+                                    <span>{campaign.donations_count} darczyńców</span>
+                                </div>
+                            </div>
+                        )}
                         {showSupportButton && showForm && (
                             <button
                                 onClick={scrollToForm}
                                 style={{
-                                    marginTop: 12,
+                                    marginBottom: 16,
                                     padding: "10px 24px",
                                     backgroundColor: primaryColor,
                                     color: "#fff",
@@ -303,11 +330,6 @@ export default function DonationWidget({
                             >
                                 <HeartIcon color="#fff" size={14} /> Wesprzyj
                             </button>
-                        )}
-                        {showBeneficiary && campaign.beneficiary && (
-                            <p style={{ fontSize: 14, color: primaryColor, marginBottom: 12, margin: "8px 0" }}>
-                                Dla: {campaign.beneficiary}
-                            </p>
                         )}
                         {showDescription && (campaign.excerpt || campaign.description) && (
                             <p style={{ fontSize: 14, color: "#666", lineHeight: 1.5, margin: "0 0 16px 0" }}>
@@ -339,29 +361,6 @@ export default function DonationWidget({
                                 ))}
                             </div>
                         )}
-                    </div>
-                </div>
-            )}
-
-            {/* Progress Bar */}
-            {showProgress && (
-                <div style={{ background: "#fff", padding: 20, borderRadius, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 14 }}>
-                        <span style={{ fontWeight: 700 }}>{formatCurrency(campaign.collected_amount)}</span>
-                        <span style={{ color: "#666" }}>z {formatCurrency(campaign.goal_amount)}</span>
-                    </div>
-                    <div style={{ height: 12, background: "#e5e7eb", borderRadius: 6, overflow: "hidden" }}>
-                        <div style={{
-                            height: "100%",
-                            width: \`\${Math.min(percentage, 100)}%\`,
-                            background: primaryColor,
-                            borderRadius: 6,
-                            transition: "width 0.8s ease-out",
-                        }} />
-                    </div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 12, color: "#666" }}>
-                        <span style={{ fontWeight: 600, color: primaryColor }}>{percentage}%</span>
-                        <span>{campaign.donations_count} darczyńców</span>
                     </div>
                 </div>
             )}
