@@ -3,14 +3,13 @@
  *
  * Stripe Webhook Handler
  *
- * IMPORTANT: For Vercel, we need to handle raw body correctly.
- * Vercel may buffer the body differently than Next.js.
+ * For Vercel Serverless Functions, we need to handle the raw body correctly.
+ * The signature is computed over the raw request body, so we must not parse it.
  */
 
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 import { createClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
-import { buffer } from "micro"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2023-10-16",
@@ -21,11 +20,18 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY!
 )
 
-// Disable body parsing for Vercel - this is required for webhook signature verification
-export const config = {
-    api: {
-        bodyParser: false,
-    },
+// Helper to read raw body from request stream
+async function getRawBody(req: VercelRequest): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+        const chunks: Buffer[] = []
+        req.on("data", (chunk: Buffer) => {
+            chunks.push(chunk)
+        })
+        req.on("end", () => {
+            resolve(Buffer.concat(chunks))
+        })
+        req.on("error", reject)
+    })
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -40,14 +46,44 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(400).json({ error: "No signature" })
     }
 
-    // Get raw body using micro's buffer function - this is the recommended approach for Vercel
-    let rawBody: Buffer
-    try {
-        rawBody = await buffer(req)
-    } catch (err) {
-        console.error("Failed to get raw body:", err)
-        return res.status(400).json({ error: "Failed to read body" })
+    let rawBody: Buffer | string
+
+    // Try multiple approaches to get raw body
+    // Approach 1: Check if body is already a Buffer (some Vercel configurations)
+    if (Buffer.isBuffer(req.body)) {
+        rawBody = req.body
+        console.log("Using req.body as Buffer")
     }
+    // Approach 2: Check if body is a string
+    else if (typeof req.body === "string") {
+        rawBody = req.body
+        console.log("Using req.body as string")
+    }
+    // Approach 3: If body is parsed JSON, stringify it back (not ideal but may work)
+    else if (req.body && typeof req.body === "object") {
+        // This won't work for signature verification - body was already parsed
+        // We need to read from the stream instead
+        try {
+            rawBody = await getRawBody(req)
+            console.log("Read raw body from stream, length:", rawBody.length)
+        } catch {
+            // Stream may be consumed, try stringifying as last resort
+            rawBody = JSON.stringify(req.body)
+            console.log("WARNING: Using JSON.stringify as fallback - signature will likely fail")
+        }
+    }
+    // Approach 4: Read from stream
+    else {
+        try {
+            rawBody = await getRawBody(req)
+            console.log("Read raw body from stream, length:", rawBody.length)
+        } catch (err) {
+            console.error("Failed to get raw body:", err)
+            return res.status(400).json({ error: "Failed to read body" })
+        }
+    }
+
+    console.log("Signature header:", typeof sig === "string" ? sig.substring(0, 50) + "..." : sig)
 
     let event: Stripe.Event
 

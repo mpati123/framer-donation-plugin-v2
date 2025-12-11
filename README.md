@@ -107,14 +107,18 @@ Schemat utworzy:
 ### 2.3 Skonfiguruj webhook (po deploy na Vercel)
 
 1. Przejdź do **Developers** → **Webhooks**
-2. Kliknij "Add endpoint"
-3. Endpoint URL: `https://TWOJA-DOMENA.vercel.app/api/webhook`
-4. Wybierz eventy:
-   - `checkout.session.completed`
-   - `payment_intent.succeeded`
-   - `payment_intent.payment_failed`
-5. Kliknij "Add endpoint"
-6. Kliknij "Reveal" przy Signing secret i zapisz → `STRIPE_WEBHOOK_SECRET`
+2. Kliknij **+ Add destination**
+3. Wybierz **Your account** (powinno być już zaznaczone)
+4. W polu wyszukiwania wpisz `checkout.session.completed` i zaznacz ten event
+5. Kliknij **Continue →**
+6. Wybierz **Webhook endpoint**
+7. Kliknij **Continue →**
+8. W polu **Endpoint URL** wpisz: `https://TWOJA-DOMENA.vercel.app/api/webhook`
+9. Kliknij **Create destination**
+10. Po utworzeniu kliknij na webhook, potem **Signing secret** → **Reveal**
+11. Skopiuj secret (zaczyna się od `whsec_`) i zapisz → `STRIPE_WEBHOOK_SECRET`
+
+> ⚠️ **UWAGA:** Secret z Stripe CLI (`stripe listen`) jest tymczasowy i działa tylko podczas sesji CLI. Do produkcji potrzebujesz stałego secretu z Dashboard.
 
 ### 2.4 Włącz metody płatności (opcjonalnie)
 
