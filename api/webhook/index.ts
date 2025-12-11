@@ -54,17 +54,60 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             case "checkout.session.completed": {
                 const session = event.data.object as Stripe.Checkout.Session
 
-                // Update donation status
-                const { error: updateError } = await supabase
-                    .from("donations")
-                    .update({
-                        status: "completed",
-                        stripe_payment_intent: session.payment_intent as string,
-                    })
-                    .eq("stripe_session_id", session.id)
+                console.log(`Processing checkout.session.completed for session ${session.id}`)
+                console.log(`Metadata:`, session.metadata)
 
-                if (updateError) {
-                    console.error("Failed to update donation:", updateError)
+                // First, try to update existing donation
+                const { data: existingDonation, error: selectError } = await supabase
+                    .from("donations")
+                    .select("id")
+                    .eq("stripe_session_id", session.id)
+                    .single()
+
+                if (selectError) {
+                    console.log(`No existing donation found for session ${session.id}, creating new one`)
+
+                    // Create new donation from session metadata
+                    const metadata = session.metadata || {}
+                    const amountTotal = session.amount_total ? session.amount_total / 100 : 0
+
+                    const { error: insertError } = await supabase
+                        .from("donations")
+                        .insert({
+                            campaign_id: metadata.campaign_id,
+                            amount: amountTotal,
+                            currency: session.currency?.toUpperCase() || "PLN",
+                            donor_name: metadata.donor_name || "Anonimowy",
+                            donor_email: metadata.donor_email || session.customer_email,
+                            message: metadata.message || "",
+                            is_anonymous: metadata.is_anonymous === "true",
+                            stripe_session_id: session.id,
+                            stripe_payment_intent: session.payment_intent as string,
+                            status: "completed",
+                        })
+
+                    if (insertError) {
+                        console.error("Failed to create donation:", insertError)
+                    } else {
+                        console.log(`Created completed donation for session ${session.id}`)
+                    }
+                } else {
+                    console.log(`Found existing donation ${existingDonation.id}, updating status`)
+
+                    // Update existing donation
+                    const { error: updateError } = await supabase
+                        .from("donations")
+                        .update({
+                            status: "completed",
+                            stripe_payment_intent: session.payment_intent as string,
+                        })
+                        .eq("stripe_session_id", session.id)
+
+                    if (updateError) {
+                        console.error("Failed to update donation:", updateError)
+                    } else {
+                        console.log(`Updated donation to completed for session ${session.id}`)
+                    }
                 }
 
                 console.log(`Payment completed: ${session.id}`)

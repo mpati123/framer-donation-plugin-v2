@@ -123,7 +123,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         })
 
         // Create pending donation record
-        await supabase.from("donations").insert({
+        const { error: insertError } = await supabase.from("donations").insert({
             campaign_id,
             amount: donationAmount,
             currency: currency.toUpperCase(),
@@ -134,6 +134,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             stripe_session_id: session.id,
             status: "pending",
         })
+
+        if (insertError) {
+            console.error("Failed to create donation record:", insertError)
+            // Don't fail the checkout - the user can still pay
+            // Webhook will need to handle creating the record if it doesn't exist
+        } else {
+            console.log(`Created pending donation for session ${session.id}`)
+        }
 
         return res.status(200).json({
             checkout_url: session.url,
