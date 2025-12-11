@@ -126,7 +126,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const { error: insertError } = await supabase.from("donations").insert({
             campaign_id,
             amount: donationAmount,
-            currency: currency.toUpperCase(),
             donor_name,
             donor_email,
             message,

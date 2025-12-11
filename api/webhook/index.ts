@@ -76,7 +76,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                         .insert({
                             campaign_id: metadata.campaign_id,
                             amount: amountTotal,
-                            currency: session.currency?.toUpperCase() || "PLN",
                             donor_name: metadata.donor_name || "Anonimowy",
                             donor_email: metadata.donor_email || session.customer_email,
                             message: metadata.message || "",
