@@ -263,6 +263,9 @@ export default function DonationWidget({
             display: "flex",
             flexDirection: "column",
             gap: 24,
+            width: "100%",
+            maxWidth: "100%",
+            overflow: "hidden",
         }}>
             {/* Campaign Card */}
             {showCard && (
@@ -367,7 +370,7 @@ export default function DonationWidget({
 
             {/* Donation Form */}
             {showForm && (
-                <form ref={formRef} onSubmit={handleFormSubmit} style={{ background: "#fff", padding: 24, borderRadius, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+                <form ref={formRef} onSubmit={handleFormSubmit} style={{ background: "#fff", padding: 24, borderRadius, boxShadow: "0 2px 10px rgba(0,0,0,0.05)", width: "100%", maxWidth: "100%", overflow: "hidden", boxSizing: "border-box" as const }}>
                     {error && (
                         <div style={{ padding: 12, background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, color: "#dc2626", fontSize: 14, marginBottom: 16 }}>
                             {error}
@@ -436,15 +439,19 @@ export default function DonationWidget({
                     )}
                     {privacyPolicyUrl && (
                         <div style={{ marginBottom: 20 }}>
-                            <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 13, lineHeight: 1.5, color: "#666" }}>
+                            <label style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer", fontSize: 11, lineHeight: 1.5, color: "#888" }}>
                                 <input
                                     type="checkbox"
                                     checked={acceptedPrivacy}
                                     onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                                    style={{ width: 18, height: 18, cursor: "pointer", flexShrink: 0, marginTop: 2 }}
+                                    style={{ width: 16, height: 16, cursor: "pointer", flexShrink: 0, marginTop: 1 }}
                                 />
                                 <span>
-                                    {privacyPolicyText}{" "}
+                                    {privacyPolicyText.split(". ").map((sentence, i, arr) => (
+                                        <span key={i}>
+                                            {sentence}{i < arr.length - 1 ? "." : ""}{i < arr.length - 1 && <br />}
+                                        </span>
+                                    ))}{" "}
                                     <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer" style={{ color: primaryColor, textDecoration: "underline" }}>
                                         Polityka prywatności
                                     </a> *
