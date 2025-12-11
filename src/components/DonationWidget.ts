@@ -1,7 +1,7 @@
 export function getDonationWidgetCode(): string {
   return `
 import { addPropertyControls, ControlType } from "framer"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 interface Campaign {
     id: string
@@ -37,11 +37,16 @@ interface Props {
     showImage?: boolean
     showDescription?: boolean
     showBeneficiary?: boolean
+    showSupportButton?: boolean
     // Form options
     amounts?: number[]
     showCustomAmount?: boolean
     showMessage?: boolean
+    showAnonymousOption?: boolean
     minAmount?: number
+    // Privacy policy
+    privacyPolicyUrl?: string
+    privacyPolicyText?: string
     // Button options
     buttonAmount?: number
     buttonText?: string
@@ -68,6 +73,15 @@ function getInitials(name: string): string {
     return name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2)
 }
 
+// Heart icon component
+function HeartIcon({ color = "#e74c3c", size = 16 }: { color?: string; size?: number }) {
+    return (
+        <svg width={size} height={size} viewBox="0 0 24 24" fill={color} style={{ display: "inline-block", verticalAlign: "middle", marginLeft: 4 }}>
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+    )
+}
+
 export default function DonationWidget({
     campaignId = "",
     apiUrl = "",
@@ -81,11 +95,16 @@ export default function DonationWidget({
     showImage = true,
     showDescription = true,
     showBeneficiary = true,
+    showSupportButton = true,
     // Form
     amounts = [20, 50, 100, 200],
     showCustomAmount = true,
     showMessage = true,
+    showAnonymousOption = true,
     minAmount = 5,
+    // Privacy policy
+    privacyPolicyUrl = "",
+    privacyPolicyText = "Wpłacając, wyrażasz zgodę na przetwarzanie Twoich danych osobowych zgodnie z polityką prywatności i upoważniasz Fundację Przyjaciel Zwierz do przekazania informacji podanych w formularzu osobom, które podejmują decyzje w niniejszej kwestii, a także do przesyłania informacji za pośrednictwem newslettera.",
     // Button
     buttonAmount = 50,
     buttonText = "Wpłać {amount} zł",
@@ -101,6 +120,7 @@ export default function DonationWidget({
     const [campaign, setCampaign] = useState<Campaign | null>(null)
     const [donations, setDonations] = useState<Donation[]>([])
     const [loading, setLoading] = useState(true)
+    const formRef = useRef<HTMLFormElement>(null)
 
     // Form state
     const [selectedAmount, setSelectedAmount] = useState<number | null>(null)
@@ -108,8 +128,14 @@ export default function DonationWidget({
     const [donorName, setDonorName] = useState("")
     const [donorEmail, setDonorEmail] = useState("")
     const [message, setMessage] = useState("")
+    const [isAnonymous, setIsAnonymous] = useState(false)
+    const [acceptedPrivacy, setAcceptedPrivacy] = useState(false)
     const [formLoading, setFormLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
+
+    const scrollToForm = () => {
+        formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+    }
 
     useEffect(() => {
         if (!campaignId || !apiUrl) {
@@ -142,6 +168,7 @@ export default function DonationWidget({
                     donor_name: donorName,
                     donor_email: donorEmail,
                     message,
+                    is_anonymous: isAnonymous,
                 }),
             })
             const data = await res.json()
@@ -166,6 +193,10 @@ export default function DonationWidget({
         }
         if (!donorEmail.trim() || !donorEmail.includes("@")) {
             setError("Prawidłowy adres email jest wymagany")
+            return
+        }
+        if (privacyPolicyUrl && !acceptedPrivacy) {
+            setError("Musisz zaakceptować politykę prywatności")
             return
         }
         handleDonate(amount)
@@ -249,6 +280,27 @@ export default function DonationWidget({
                     )}
                     <div style={{ padding: 24 }}>
                         <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, margin: 0 }}>{campaign.title}</h3>
+                        {showSupportButton && showForm && (
+                            <button
+                                onClick={scrollToForm}
+                                style={{
+                                    marginTop: 12,
+                                    padding: "10px 24px",
+                                    backgroundColor: primaryColor,
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: 20,
+                                    fontSize: 14,
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    gap: 6,
+                                }}
+                            >
+                                <HeartIcon color="#fff" size={14} /> Wesprzyj
+                            </button>
+                        )}
                         {showBeneficiary && campaign.beneficiary && (
                             <p style={{ fontSize: 14, color: primaryColor, marginBottom: 12, margin: "8px 0" }}>
                                 Dla: {campaign.beneficiary}
@@ -288,7 +340,7 @@ export default function DonationWidget({
 
             {/* Donation Form */}
             {showForm && (
-                <form onSubmit={handleFormSubmit} style={{ background: "#fff", padding: 24, borderRadius, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
+                <form ref={formRef} onSubmit={handleFormSubmit} style={{ background: "#fff", padding: 24, borderRadius, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
                     {error && (
                         <div style={{ padding: 12, background: "#fef2f2", border: "1px solid #fecaca", borderRadius: 8, color: "#dc2626", fontSize: 14, marginBottom: 16 }}>
                             {error}
@@ -342,6 +394,37 @@ export default function DonationWidget({
                             <textarea placeholder="Twoja wiadomość..." value={message} onChange={(e) => setMessage(e.target.value)} style={{ ...inputStyle, minHeight: 80, resize: "vertical" }} />
                         </div>
                     )}
+                    {showAnonymousOption && (
+                        <div style={{ marginBottom: 20 }}>
+                            <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontSize: 14 }}>
+                                <input
+                                    type="checkbox"
+                                    checked={isAnonymous}
+                                    onChange={(e) => setIsAnonymous(e.target.checked)}
+                                    style={{ width: 18, height: 18, cursor: "pointer" }}
+                                />
+                                <span>Chcę pozostać anonimowy/a na liście darczyńców</span>
+                            </label>
+                        </div>
+                    )}
+                    {privacyPolicyUrl && (
+                        <div style={{ marginBottom: 20 }}>
+                            <label style={{ display: "flex", alignItems: "flex-start", gap: 10, cursor: "pointer", fontSize: 13, lineHeight: 1.5, color: "#666" }}>
+                                <input
+                                    type="checkbox"
+                                    checked={acceptedPrivacy}
+                                    onChange={(e) => setAcceptedPrivacy(e.target.checked)}
+                                    style={{ width: 18, height: 18, cursor: "pointer", flexShrink: 0, marginTop: 2 }}
+                                />
+                                <span>
+                                    {privacyPolicyText}{" "}
+                                    <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer" style={{ color: primaryColor, textDecoration: "underline" }}>
+                                        Polityka prywatności
+                                    </a> *
+                                </span>
+                            </label>
+                        </div>
+                    )}
                     <button
                         type="submit"
                         disabled={formLoading || !currentFormAmount}
@@ -388,7 +471,8 @@ export default function DonationWidget({
                 <div style={{ background: "#fff", padding: 20, borderRadius, boxShadow: "0 2px 10px rgba(0,0,0,0.05)" }}>
                     <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16, margin: "0 0 16px 0" }}>Ostatnie wpłaty</h4>
                     {donations.map((donation) => {
-                        const name = donation.is_anonymous ? "Anonim" : (donation.donor_name || "Darczyńca")
+                        const name = donation.is_anonymous ? "Anonimowy Darczyńca" : (donation.donor_name || "Darczyńca")
+                        const initials = donation.is_anonymous ? "❤️" : getInitials(name)
                         return (
                             <div key={donation.id} style={{
                                 display: "flex",
@@ -406,21 +490,24 @@ export default function DonationWidget({
                                     alignItems: "center",
                                     justifyContent: "center",
                                     fontWeight: 600,
-                                    fontSize: 13,
+                                    fontSize: donation.is_anonymous ? 18 : 13,
                                     flexShrink: 0,
                                 }}>
-                                    {getInitials(name)}
+                                    {initials}
                                 </div>
                                 <div style={{ flex: 1, minWidth: 0 }}>
                                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                        <span style={{ fontWeight: 600, fontSize: 14 }}>{name}</span>
+                                        <span style={{ fontWeight: 600, fontSize: 14, display: "flex", alignItems: "center" }}>
+                                            {name}
+                                            <HeartIcon color={primaryColor} size={14} />
+                                        </span>
                                         {showDonorAmount && (
                                             <span style={{ fontWeight: 700, color: primaryColor, fontSize: 14 }}>
                                                 {formatCurrency(donation.amount)}
                                             </span>
                                         )}
                                     </div>
-                                    {showDonorMessage && donation.message && (
+                                    {showDonorMessage && donation.message && !donation.is_anonymous && (
                                         <p style={{ fontSize: 13, color: "#666", margin: "4px 0 0 0", lineHeight: 1.4 }}>
                                             "{donation.message}"
                                         </p>
@@ -453,11 +540,16 @@ addPropertyControls(DonationWidget, {
     showImage: { type: ControlType.Boolean, title: "Pokaż zdjęcie", defaultValue: true, hidden: (props) => !props.showCard },
     showDescription: { type: ControlType.Boolean, title: "Pokaż opis", defaultValue: true, hidden: (props) => !props.showCard },
     showBeneficiary: { type: ControlType.Boolean, title: "Pokaż beneficjenta", defaultValue: true, hidden: (props) => !props.showCard },
+    showSupportButton: { type: ControlType.Boolean, title: "Przycisk Wesprzyj", defaultValue: true, hidden: (props) => !props.showCard || !props.showForm },
 
     amounts: { type: ControlType.Array, title: "Kwoty", control: { type: ControlType.Number }, defaultValue: [20, 50, 100, 200], hidden: (props) => !props.showForm },
     showCustomAmount: { type: ControlType.Boolean, title: "Własna kwota", defaultValue: true, hidden: (props) => !props.showForm },
     showMessage: { type: ControlType.Boolean, title: "Pole wiadomości", defaultValue: true, hidden: (props) => !props.showForm },
+    showAnonymousOption: { type: ControlType.Boolean, title: "Opcja anonimowości", defaultValue: true, hidden: (props) => !props.showForm },
     minAmount: { type: ControlType.Number, title: "Min. kwota", defaultValue: 5, min: 1, hidden: (props) => !props.showForm },
+
+    privacyPolicyUrl: { type: ControlType.String, title: "URL polityki prywatności", defaultValue: "", hidden: (props) => !props.showForm },
+    privacyPolicyText: { type: ControlType.String, title: "Tekst zgody", defaultValue: "Wpłacając, wyrażasz zgodę na przetwarzanie Twoich danych osobowych zgodnie z polityką prywatności i upoważniasz Fundację Przyjaciel Zwierz do przekazania informacji podanych w formularzu osobom, które podejmują decyzje w niniejszej kwestii, a także do przesyłania informacji za pośrednictwem newslettera.", hidden: (props) => !props.showForm || !props.privacyPolicyUrl },
 
     buttonAmount: { type: ControlType.Number, title: "Kwota przycisku", defaultValue: 50, min: 1, hidden: (props) => !props.showButton },
     buttonText: { type: ControlType.String, title: "Tekst przycisku", defaultValue: "Wpłać {amount} zł", hidden: (props) => !props.showButton },
