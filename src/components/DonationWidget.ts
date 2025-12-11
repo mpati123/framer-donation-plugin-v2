@@ -317,21 +317,23 @@ export default function DonationWidget({
                             <button
                                 onClick={scrollToForm}
                                 style={{
+                                    width: "100%",
                                     marginBottom: 16,
-                                    padding: "10px 24px",
+                                    padding: "14px 24px",
                                     backgroundColor: primaryColor,
                                     color: "#fff",
                                     border: "none",
-                                    borderRadius: 20,
-                                    fontSize: 14,
+                                    borderRadius: 25,
+                                    fontSize: 16,
                                     fontWeight: 600,
                                     cursor: "pointer",
-                                    display: "inline-flex",
+                                    display: "flex",
                                     alignItems: "center",
-                                    gap: 6,
+                                    justifyContent: "center",
+                                    gap: 8,
                                 }}
                             >
-                                <HeartIcon color="#fff" size={14} /> Wesprzyj
+                                <HeartIcon color="#fff" size={16} /> Wesprzyj
                             </button>
                         )}
                         {showDescription && (campaign.excerpt || campaign.description) && (
