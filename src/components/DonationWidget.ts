@@ -107,7 +107,7 @@ export default function DonationWidget({
     minAmount = 5,
     // Privacy policy
     privacyPolicyUrl = "",
-    privacyPolicyText = "Wpłacając, wyrażasz zgodę na przetwarzanie Twoich danych osobowych zgodnie z polityką prywatności i upoważniasz Fundację Przyjaciel Zwierz do przekazania informacji podanych w formularzu osobom, które podejmują decyzje w niniejszej kwestii, a także do przesyłania informacji za pośrednictwem newslettera.",
+    privacyPolicyText = "Wpłacając, wyrażasz zgodę na przetwarzanie Twoich danych osobowych zgodnie z polityką prywatności i upoważniasz Fundację do przekazania informacji podanych w formularzu osobom, które podejmują decyzje w niniejszej kwestii, a także do przesyłania informacji za pośrednictwem newslettera.",
     // Button
     buttonAmount = 50,
     buttonText = "Wpłać {amount} zł",
@@ -264,7 +264,7 @@ export default function DonationWidget({
             flexDirection: "column",
             gap: 24,
             width: "100%",
-            maxWidth: "100%",
+            maxWidth: 450,
             overflow: "hidden",
         }}>
             {/* Campaign Card */}
@@ -438,25 +438,21 @@ export default function DonationWidget({
                         </div>
                     )}
                     {privacyPolicyUrl && (
-                        <div style={{ marginBottom: 20 }}>
-                            <label style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer", fontSize: 11, lineHeight: 1.5, color: "#888" }}>
+                        <div style={{ marginBottom: 20, width: "100%" }}>
+                            <div style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer" }} onClick={() => setAcceptedPrivacy(!acceptedPrivacy)}>
                                 <input
                                     type="checkbox"
                                     checked={acceptedPrivacy}
                                     onChange={(e) => setAcceptedPrivacy(e.target.checked)}
-                                    style={{ width: 16, height: 16, cursor: "pointer", flexShrink: 0, marginTop: 1 }}
+                                    style={{ width: 16, height: 16, cursor: "pointer", flexShrink: 0, marginTop: 2 }}
                                 />
-                                <span>
-                                    {privacyPolicyText.split(". ").map((sentence, i, arr) => (
-                                        <span key={i}>
-                                            {sentence}{i < arr.length - 1 ? "." : ""}{i < arr.length - 1 && <br />}
-                                        </span>
-                                    ))}{" "}
-                                    <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer" style={{ color: primaryColor, textDecoration: "underline" }}>
+                                <div style={{ fontSize: 11, lineHeight: 1.5, color: "#888", flex: 1 }}>
+                                    {privacyPolicyText}{" "}
+                                    <a href={privacyPolicyUrl} target="_blank" rel="noopener noreferrer" style={{ color: primaryColor, textDecoration: "underline" }} onClick={(e) => e.stopPropagation()}>
                                         Polityka prywatności
                                     </a> *
-                                </span>
-                            </label>
+                                </div>
+                            </div>
                         </div>
                     )}
                     <button
@@ -584,7 +580,7 @@ addPropertyControls(DonationWidget, {
     minAmount: { type: ControlType.Number, title: "Min. kwota", defaultValue: 5, min: 1, hidden: (props) => !props.showForm },
 
     privacyPolicyUrl: { type: ControlType.String, title: "URL polityki prywatności", defaultValue: "", hidden: (props) => !props.showForm },
-    privacyPolicyText: { type: ControlType.String, title: "Tekst zgody", defaultValue: "Wpłacając, wyrażasz zgodę na przetwarzanie Twoich danych osobowych zgodnie z polityką prywatności i upoważniasz Fundację Przyjaciel Zwierz do przekazania informacji podanych w formularzu osobom, które podejmują decyzje w niniejszej kwestii, a także do przesyłania informacji za pośrednictwem newslettera.", hidden: (props) => !props.showForm || !props.privacyPolicyUrl },
+    privacyPolicyText: { type: ControlType.String, title: "Tekst zgody", defaultValue: "Wpłacając, wyrażasz zgodę na przetwarzanie Twoich danych osobowych zgodnie z polityką prywatności i upoważniasz Fundację do przekazania informacji podanych w formularzu osobom, które podejmują decyzje w niniejszej kwestii, a także do przesyłania informacji za pośrednictwem newslettera.", hidden: (props) => !props.showForm || !props.privacyPolicyUrl },
 
     buttonAmount: { type: ControlType.Number, title: "Kwota przycisku", defaultValue: 50, min: 1, hidden: (props) => !props.showButton },
     buttonText: { type: ControlType.String, title: "Tekst przycisku", defaultValue: "Wpłać {amount} zł", hidden: (props) => !props.showButton },
