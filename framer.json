@@ -1,8 +1,6 @@
 {
-  "id": "f4e488",
-  "name": "Donation Framer Plugin V 2",
-  "modes": [
-    "canvas"
-  ],
+  "id": "donate",
+  "name": "Donation & Fundraising",
+  "modes": ["canvas"],
   "icon": "/icon.svg"
 }
