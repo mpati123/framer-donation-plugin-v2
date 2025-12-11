@@ -2,11 +2,15 @@
  * POST /api/webhook
  *
  * Stripe Webhook Handler
+ *
+ * IMPORTANT: For Vercel, we need to handle raw body correctly.
+ * Vercel may buffer the body differently than Next.js.
  */
 
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 import { createClient } from "@supabase/supabase-js"
 import Stripe from "stripe"
+import { buffer } from "micro"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
     apiVersion: "2023-10-16",
@@ -17,21 +21,11 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY!
 )
 
-// Disable body parsing, need raw body for Stripe signature
+// Disable body parsing for Vercel - this is required for webhook signature verification
 export const config = {
     api: {
         bodyParser: false,
     },
-}
-
-// Helper to get raw body
-async function getRawBody(req: VercelRequest): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        const chunks: Buffer[] = []
-        req.on('data', (chunk: Buffer) => chunks.push(chunk))
-        req.on('end', () => resolve(Buffer.concat(chunks)))
-        req.on('error', reject)
-    })
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -39,25 +33,34 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(405).json({ error: "Method not allowed" })
     }
 
-    const buf = await getRawBody(req)
     const sig = req.headers["stripe-signature"]
+
+    if (!sig) {
+        console.error("No stripe-signature header")
+        return res.status(400).json({ error: "No signature" })
+    }
+
+    // Get raw body using micro's buffer function - this is the recommended approach for Vercel
+    let rawBody: Buffer
+    try {
+        rawBody = await buffer(req)
+    } catch (err) {
+        console.error("Failed to get raw body:", err)
+        return res.status(400).json({ error: "Failed to read body" })
+    }
 
     let event: Stripe.Event
 
     try {
-        if (process.env.STRIPE_WEBHOOK_SECRET && sig) {
-            event = stripe.webhooks.constructEvent(
-                buf,
-                sig,
-                process.env.STRIPE_WEBHOOK_SECRET
-            )
-        } else {
-            // For testing without webhook secret
-            event = JSON.parse(buf.toString())
-        }
+        event = stripe.webhooks.constructEvent(
+            rawBody,
+            sig,
+            process.env.STRIPE_WEBHOOK_SECRET!
+        )
     } catch (err) {
-        console.error("Webhook signature verification failed:", err)
-        return res.status(400).json({ error: "Invalid signature" })
+        const message = err instanceof Error ? err.message : "Unknown error"
+        console.error("Webhook signature verification failed:", message)
+        return res.status(400).json({ error: `Invalid signature: ${message}` })
     }
 
     try {
