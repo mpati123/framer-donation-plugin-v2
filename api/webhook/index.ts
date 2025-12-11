@@ -3,8 +3,8 @@
  *
  * Stripe Webhook Handler
  *
- * For Vercel Serverless Functions, we need to handle the raw body correctly.
- * The signature is computed over the raw request body, so we must not parse it.
+ * IMPORTANT: Vercel Serverless Functions automatically parse JSON body.
+ * For Stripe webhooks, we need to skip signature verification OR use a workaround.
  */
 
 import type { VercelRequest, VercelResponse } from "@vercel/node"
@@ -20,83 +20,33 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY!
 )
 
-// Helper to read raw body from request stream
-async function getRawBody(req: VercelRequest): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
-        const chunks: Buffer[] = []
-        req.on("data", (chunk: Buffer) => {
-            chunks.push(chunk)
-        })
-        req.on("end", () => {
-            resolve(Buffer.concat(chunks))
-        })
-        req.on("error", reject)
-    })
-}
-
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method !== "POST") {
         return res.status(405).json({ error: "Method not allowed" })
     }
 
-    const sig = req.headers["stripe-signature"]
-
-    if (!sig) {
-        console.error("No stripe-signature header")
-        return res.status(400).json({ error: "No signature" })
-    }
-
-    let rawBody: Buffer | string
-
-    // Try multiple approaches to get raw body
-    // Approach 1: Check if body is already a Buffer (some Vercel configurations)
-    if (Buffer.isBuffer(req.body)) {
-        rawBody = req.body
-        console.log("Using req.body as Buffer")
-    }
-    // Approach 2: Check if body is a string
-    else if (typeof req.body === "string") {
-        rawBody = req.body
-        console.log("Using req.body as string")
-    }
-    // Approach 3: If body is parsed JSON, stringify it back (not ideal but may work)
-    else if (req.body && typeof req.body === "object") {
-        // This won't work for signature verification - body was already parsed
-        // We need to read from the stream instead
-        try {
-            rawBody = await getRawBody(req)
-            console.log("Read raw body from stream, length:", rawBody.length)
-        } catch {
-            // Stream may be consumed, try stringifying as last resort
-            rawBody = JSON.stringify(req.body)
-            console.log("WARNING: Using JSON.stringify as fallback - signature will likely fail")
-        }
-    }
-    // Approach 4: Read from stream
-    else {
-        try {
-            rawBody = await getRawBody(req)
-            console.log("Read raw body from stream, length:", rawBody.length)
-        } catch (err) {
-            console.error("Failed to get raw body:", err)
-            return res.status(400).json({ error: "Failed to read body" })
-        }
-    }
-
-    console.log("Signature header:", typeof sig === "string" ? sig.substring(0, 50) + "..." : sig)
-
+    // For Vercel, we'll verify the event by fetching it from Stripe API
+    // This is an alternative approach when raw body isn't available
     let event: Stripe.Event
 
     try {
-        event = stripe.webhooks.constructEvent(
-            rawBody,
-            sig,
-            process.env.STRIPE_WEBHOOK_SECRET!
-        )
+        // Get event data from request body (already parsed by Vercel)
+        const eventData = req.body as Stripe.Event
+
+        if (!eventData || !eventData.id) {
+            console.error("Invalid event data received")
+            return res.status(400).json({ error: "Invalid event data" })
+        }
+
+        // Verify the event by retrieving it from Stripe API
+        // This ensures the event is legitimate
+        event = await stripe.events.retrieve(eventData.id)
+
+        console.log(`Verified event ${event.id} of type ${event.type}`)
     } catch (err) {
         const message = err instanceof Error ? err.message : "Unknown error"
-        console.error("Webhook signature verification failed:", message)
-        return res.status(400).json({ error: `Invalid signature: ${message}` })
+        console.error("Event verification failed:", message)
+        return res.status(400).json({ error: `Invalid event: ${message}` })
     }
 
     try {
