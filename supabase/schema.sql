@@ -34,9 +34,21 @@ CREATE TABLE campaigns (
     progress_color TEXT DEFAULT '#4CAF50',
     show_donors BOOLEAN DEFAULT true,
 
+    -- External link (optional - for campaigns hosted elsewhere)
+    external_url TEXT,
+
     -- SEO
     slug TEXT UNIQUE
 );
+
+-- ============================================
+-- MIGRATIONS (run these if tables already exist)
+-- ============================================
+-- If you already have the tables and need to add missing columns, run:
+--
+-- ALTER TABLE campaigns ADD COLUMN IF NOT EXISTS external_url TEXT;
+-- ALTER TABLE donations ADD COLUMN IF NOT EXISTS stripe_payment_intent TEXT;
+-- CREATE INDEX IF NOT EXISTS idx_donations_stripe_payment_intent ON donations(stripe_payment_intent);
 
 -- ============================================
 -- DONATIONS TABLE
@@ -77,6 +89,7 @@ CREATE INDEX idx_campaigns_archived ON campaigns(archived_at);
 CREATE INDEX idx_donations_campaign_id ON donations(campaign_id);
 CREATE INDEX idx_donations_status ON donations(status);
 CREATE INDEX idx_donations_stripe_session ON donations(stripe_session_id);
+CREATE INDEX idx_donations_stripe_payment_intent ON donations(stripe_payment_intent);
 
 -- ============================================
 -- FUNCTIONS
