@@ -25,6 +25,14 @@ interface WidgetOptions {
     showDonors: boolean
 }
 
+interface GridOptions {
+    showImage: boolean
+    showProgress: boolean
+    showBeneficiary: boolean
+    showDescription: boolean
+    showDonateButton: boolean
+}
+
 const WIDGET_FILE_NAME = "DonationWidget.tsx"
 const GRID_FILE_NAME = "DonationGrid.tsx"
 
@@ -34,6 +42,14 @@ const SECTION_INFO = {
     showForm: { name: "Formularz wpłaty", description: "Pełny formularz" },
     showButton: { name: "Przycisk wpłaty", description: "Szybka wpłata" },
     showDonors: { name: "Lista darczyńców", description: "Ostatnie wpłaty" },
+}
+
+const GRID_SECTION_INFO = {
+    showImage: { name: "Zdjęcie", description: "Obrazek zbiórki" },
+    showProgress: { name: "Pasek postępu", description: "Zebrana kwota i cel" },
+    showBeneficiary: { name: "Beneficjent", description: "Dla kogo zbiórka" },
+    showDescription: { name: "Opis", description: "Krótki opis" },
+    showDonateButton: { name: "Przycisk Wesprzyj", description: "Link do zbiórki" },
 }
 
 framer.showUI({
@@ -52,6 +68,7 @@ export function App() {
     const [isConfigured, setIsConfigured] = useState(false)
     const [adding, setAdding] = useState(false)
     const [updating, setUpdating] = useState(false)
+    const [mode, setMode] = useState<string>("canvas")
     const [widgetOptions, setWidgetOptions] = useState<WidgetOptions>({
         showCard: true,
         showProgress: true,
@@ -59,9 +76,20 @@ export function App() {
         showButton: false,
         showDonors: false,
     })
+    const [gridOptions, setGridOptions] = useState<GridOptions>({
+        showImage: true,
+        showProgress: true,
+        showBeneficiary: true,
+        showDescription: true,
+        showDonateButton: true,
+    })
 
     useEffect(() => {
         const loadConfig = async () => {
+            // Check current mode
+            const currentMode = await framer.getMode()
+            setMode(currentMode)
+
             const savedApiUrl = await framer.getPluginData("apiUrl")
             const savedApiKey = await framer.getPluginData("apiKey")
             if (savedApiUrl) setApiUrl(savedApiUrl)
@@ -96,15 +124,21 @@ export function App() {
             setError("Wypełnij wszystkie pola")
             return
         }
-        await framer.setPluginData("apiUrl", apiUrl)
-        await framer.setPluginData("apiKey", apiKey)
+        const canSetData = await framer.isAllowedTo("setPluginData")
+        if (canSetData) {
+            await framer.setPluginData("apiUrl", apiUrl)
+            await framer.setPluginData("apiKey", apiKey)
+        }
         setIsConfigured(true)
         fetchCampaigns(apiUrl, apiKey)
     }
 
     const handleDisconnect = async () => {
-        await framer.setPluginData("apiUrl", "")
-        await framer.setPluginData("apiKey", "")
+        const canSetData = await framer.isAllowedTo("setPluginData")
+        if (canSetData) {
+            await framer.setPluginData("apiUrl", "")
+            await framer.setPluginData("apiKey", "")
+        }
         setApiUrl("")
         setApiKey("")
         setCampaigns([])
@@ -124,7 +158,12 @@ export function App() {
         const existingFiles = await framer.getCodeFiles()
         const existingFile = existingFiles.find(f => f.name === WIDGET_FILE_NAME)
 
-        if (existingFile && !forceUpdate) {
+        if (existingFile) {
+            if (forceUpdate) {
+                // Update existing file using setFileContent
+                await existingFile.setFileContent(getDonationWidgetCode())
+                await new Promise(resolve => setTimeout(resolve, 300))
+            }
             const componentExport = existingFile.exports.find(e => e.type === "component")
             if (componentExport && 'insertURL' in componentExport) {
                 return (componentExport as { insertURL: string }).insertURL
@@ -132,6 +171,7 @@ export function App() {
             return null
         }
 
+        // Create new file
         const canCreate = await framer.isAllowedTo("createCodeFile")
         if (!canCreate) {
             setError("Brak uprawnień do tworzenia plików kodu")
@@ -158,7 +198,12 @@ export function App() {
         const existingFiles = await framer.getCodeFiles()
         const existingFile = existingFiles.find(f => f.name === GRID_FILE_NAME)
 
-        if (existingFile && !forceUpdate) {
+        if (existingFile) {
+            if (forceUpdate) {
+                // Update existing file using setFileContent
+                await existingFile.setFileContent(getDonationGridCode())
+                await new Promise(resolve => setTimeout(resolve, 300))
+            }
             const componentExport = existingFile.exports.find(e => e.type === "component")
             if (componentExport && 'insertURL' in componentExport) {
                 return (componentExport as { insertURL: string }).insertURL
@@ -166,6 +211,7 @@ export function App() {
             return null
         }
 
+        // Create new file
         const canCreate = await framer.isAllowedTo("createCodeFile")
         if (!canCreate) {
             setError("Brak uprawnień do tworzenia plików kodu")
@@ -257,6 +303,7 @@ export function App() {
                     controls: {
                         apiUrl: apiUrl,
                         campaignIds: selectedCampaigns.join(", "),
+                        ...gridOptions,
                     }
                 }
             })
@@ -317,6 +364,10 @@ export function App() {
 
     const toggleOption = (key: keyof WidgetOptions) => {
         setWidgetOptions(prev => ({ ...prev, [key]: !prev[key] }))
+    }
+
+    const toggleGridOption = (key: keyof GridOptions) => {
+        setGridOptions(prev => ({ ...prev, [key]: !prev[key] }))
     }
 
     const selectedCount = Object.values(widgetOptions).filter(Boolean).length
@@ -400,24 +451,55 @@ export function App() {
                         </div>
                     </div>
 
-                    <button
-                        className="btn-primary"
-                        onClick={handleAddWidget}
-                        disabled={adding || selectedCount === 0}
-                    >
-                        {adding ? "Dodawanie..." : `Dodaj widget na canvas`}
-                    </button>
+                    {mode === "code" ? (
+                        <div className="hint">
+                            Przejdź do trybu Canvas aby dodać widget
+                        </div>
+                    ) : (
+                        <button
+                            className="btn-primary"
+                            onClick={handleAddWidget}
+                            disabled={adding || selectedCount === 0}
+                        >
+                            {adding ? "Dodawanie..." : `Dodaj widget na canvas`}
+                        </button>
+                    )}
                 </>
             )}
 
             {isMultipleSelected && (
-                <button
-                    className="btn-primary"
-                    onClick={handleAddGrid}
-                    disabled={adding}
-                >
-                    {adding ? "Dodawanie..." : `Dodaj siatkę ${selectedCampaigns.length} zbiórek`}
-                </button>
+                <>
+                    <div className="form-group">
+                        <label>Wybierz sekcje siatki</label>
+                        <div className="component-grid">
+                            {(Object.keys(GRID_SECTION_INFO) as (keyof typeof GRID_SECTION_INFO)[]).map((key) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    className={`component-card ${gridOptions[key] ? "active" : ""}`}
+                                    onClick={() => toggleGridOption(key)}
+                                >
+                                    <span className="component-name">{GRID_SECTION_INFO[key].name}</span>
+                                    <span className="component-desc">{GRID_SECTION_INFO[key].description}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {mode === "code" ? (
+                        <div className="hint">
+                            Przejdź do trybu Canvas aby dodać siatkę
+                        </div>
+                    ) : (
+                        <button
+                            className="btn-primary"
+                            onClick={handleAddGrid}
+                            disabled={adding}
+                        >
+                            {adding ? "Dodawanie..." : `Dodaj siatkę ${selectedCampaigns.length} zbiórek`}
+                        </button>
+                    )}
+                </>
             )}
 
             {selectedCampaigns.length === 0 && (

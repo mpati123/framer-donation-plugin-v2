@@ -634,10 +634,11 @@
                 <button class="tab active" data-tab="active">Aktywne</button>
                 <button class="tab" data-tab="inactive">Nieaktywne</button>
                 <button class="tab" data-tab="archived">Archiwum</button>
+                <button class="tab" data-tab="settings">⚙️ Ustawienia</button>
             </div>
 
             <!-- Campaigns Card -->
-            <div class="card">
+            <div class="card" id="campaignsCard">
                 <div class="card-header">
                     <h3>Zbiórki</h3>
                     <button id="addCampaignBtn" class="btn btn-primary btn-small">+ Nowa zbiórka</button>
@@ -647,6 +648,43 @@
                         <div class="spinner"></div>
                         <p>Ładowanie zbiórek...</p>
                     </div>
+                </div>
+            </div>
+
+            <!-- Settings Card -->
+            <div class="card hidden" id="settingsCard">
+                <div class="card-header">
+                    <h3>Ustawienia</h3>
+                </div>
+                <div class="card-body">
+                    <form id="settingsForm">
+                        <div class="form-group">
+                            <label for="organizationName">Nazwa organizacji</label>
+                            <input type="text" id="organizationName" placeholder="np. Fundacja Przyjaciel Zwierz">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Logo organizacji</label>
+                            <p style="font-size: 12px; color: var(--text-light); margin-bottom: 10px;">
+                                Wyświetlane gdy zbiórka nie ma zdjęcia
+                            </p>
+                            <div id="settingsLogoPreview"></div>
+                            <div class="file-upload-area" id="settingsLogoUpload">
+                                <input type="file" id="settingsLogoInput" accept="image/*">
+                                <div class="upload-icon">🏢</div>
+                                <div class="upload-text"><strong>Kliknij</strong> lub przeciągnij logo</div>
+                            </div>
+                            <div id="settingsLogoProgress" class="upload-progress hidden"></div>
+                            <input type="hidden" id="settingsLogoUrl">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="settingsPrimaryColor">Domyślny kolor główny</label>
+                            <input type="color" id="settingsPrimaryColor" value="#e74c3c">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Zapisz ustawienia</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -786,7 +824,17 @@
                     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                     tab.classList.add('active');
                     currentTab = tab.dataset.tab;
-                    loadCampaigns();
+
+                    // Show/hide appropriate card
+                    if (currentTab === 'settings') {
+                        document.getElementById('campaignsCard').classList.add('hidden');
+                        document.getElementById('settingsCard').classList.remove('hidden');
+                        loadSettings();
+                    } else {
+                        document.getElementById('campaignsCard').classList.remove('hidden');
+                        document.getElementById('settingsCard').classList.add('hidden');
+                        loadCampaigns();
+                    }
                 });
             });
 
@@ -798,6 +846,10 @@
 
             // Initialize file uploads
             initFileUploads();
+
+            // Settings form
+            document.getElementById('settingsForm').addEventListener('submit', saveSettings);
+            initSettingsLogoUpload();
         });
 
         // Login
@@ -1241,6 +1293,122 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        // Settings functions
+        let settingsLogoUrl = '';
+
+        async function loadSettings() {
+            try {
+                const response = await fetch(`${apiUrl}/settings`, {
+                    headers: { 'X-API-Key': apiKey }
+                });
+
+                if (response.ok) {
+                    const settings = await response.json();
+                    document.getElementById('organizationName').value = settings.organization_name || '';
+                    document.getElementById('settingsPrimaryColor').value = settings.primary_color || '#e74c3c';
+                    settingsLogoUrl = settings.logo_url || '';
+                    document.getElementById('settingsLogoUrl').value = settingsLogoUrl;
+                    renderSettingsLogoPreview();
+                }
+            } catch (err) {
+                console.error('Error loading settings:', err);
+            }
+        }
+
+        async function saveSettings(e) {
+            e.preventDefault();
+
+            const data = {
+                organization_name: document.getElementById('organizationName').value,
+                primary_color: document.getElementById('settingsPrimaryColor').value,
+                logo_url: document.getElementById('settingsLogoUrl').value
+            };
+
+            try {
+                const response = await fetch(`${apiUrl}/settings`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-Key': apiKey
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                if (response.ok) {
+                    showToast('Ustawienia zapisane', 'success');
+                } else {
+                    const result = await response.json();
+                    showToast(result.error || 'Błąd zapisu', 'error');
+                }
+            } catch (err) {
+                showToast('Błąd połączenia', 'error');
+            }
+        }
+
+        function initSettingsLogoUpload() {
+            const uploadArea = document.getElementById('settingsLogoUpload');
+            const input = document.getElementById('settingsLogoInput');
+
+            uploadArea.addEventListener('click', () => input.click());
+            input.addEventListener('change', (e) => handleSettingsLogoUpload(e.target.files[0]));
+
+            // Drag and drop
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                if (e.dataTransfer.files[0]) {
+                    handleSettingsLogoUpload(e.dataTransfer.files[0]);
+                }
+            });
+        }
+
+        async function handleSettingsLogoUpload(file) {
+            if (!file) return;
+
+            const progress = document.getElementById('settingsLogoProgress');
+            progress.classList.remove('hidden');
+            progress.innerHTML = '<span class="spinner-small"></span> Wgrywanie...';
+
+            try {
+                const url = await uploadImage(file);
+                settingsLogoUrl = url;
+                document.getElementById('settingsLogoUrl').value = url;
+                renderSettingsLogoPreview();
+                showToast('Logo wgrane', 'success');
+            } catch (err) {
+                showToast('Błąd wgrywania: ' + err.message, 'error');
+            } finally {
+                progress.classList.add('hidden');
+            }
+        }
+
+        function renderSettingsLogoPreview() {
+            const preview = document.getElementById('settingsLogoPreview');
+            if (settingsLogoUrl) {
+                preview.innerHTML = `
+                    <div class="image-preview">
+                        <img src="${escapeHtml(settingsLogoUrl)}" alt="Logo organizacji">
+                        <button type="button" class="remove-btn" onclick="removeSettingsLogo()">&times;</button>
+                    </div>
+                `;
+            } else {
+                preview.innerHTML = '';
+            }
+        }
+
+        function removeSettingsLogo() {
+            settingsLogoUrl = '';
+            document.getElementById('settingsLogoUrl').value = '';
+            renderSettingsLogoPreview();
         }
     </script>
 </body>

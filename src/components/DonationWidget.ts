@@ -25,6 +25,12 @@ interface Donation {
     created_at: string
 }
 
+interface Settings {
+    logo_url?: string
+    organization_name?: string
+    primary_color?: string
+}
+
 interface Props {
     campaignId?: string
     apiUrl?: string
@@ -122,6 +128,7 @@ export default function DonationWidget({
 }: Props) {
     const [campaign, setCampaign] = useState<Campaign | null>(null)
     const [donations, setDonations] = useState<Donation[]>([])
+    const [settings, setSettings] = useState<Settings | null>(null)
     const [loading, setLoading] = useState(true)
     const formRef = useRef<HTMLFormElement>(null)
 
@@ -148,11 +155,13 @@ export default function DonationWidget({
 
         Promise.all([
             fetch(\`\${apiUrl}/campaigns/\${campaignId}\`).then(r => r.json()),
-            showDonors ? fetch(\`\${apiUrl}/donations?campaign_id=\${campaignId}&limit=\${donorsLimit}\`).then(r => r.json()) : Promise.resolve({ donations: [] })
+            showDonors ? fetch(\`\${apiUrl}/donations?campaign_id=\${campaignId}&limit=\${donorsLimit}\`).then(r => r.json()) : Promise.resolve({ donations: [] }),
+            fetch(\`\${apiUrl}/settings\`).then(r => r.json()).catch(() => null)
         ])
-        .then(([campaignData, donationsData]) => {
+        .then(([campaignData, donationsData, settingsData]) => {
             setCampaign(campaignData)
             setDonations(donationsData.donations || [])
+            setSettings(settingsData)
             setLoading(false)
         })
         .catch(() => setLoading(false))
@@ -275,17 +284,47 @@ export default function DonationWidget({
                     overflow: "hidden",
                     boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
                 }}>
-                    {showImage && campaign.image_url && (
+                    {showImage && (
                         <div style={{ backgroundColor: "#f5f5f5" }}>
-                            <img
-                                src={campaign.image_url}
-                                alt={campaign.title}
-                                style={{
+                            {campaign.image_url ? (
+                                <img
+                                    src={campaign.image_url}
+                                    alt={campaign.title}
+                                    style={{
+                                        width: "100%",
+                                        height: "auto",
+                                        display: "block",
+                                    }}
+                                />
+                            ) : (
+                                <div style={{
                                     width: "100%",
-                                    height: "auto",
-                                    display: "block",
-                                }}
-                            />
+                                    height: 200,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    backgroundColor: "#e5e7eb",
+                                    color: "#9ca3af",
+                                }}>
+                                    {settings?.logo_url ? (
+                                        <img
+                                            src={settings.logo_url}
+                                            alt="Logo"
+                                            style={{
+                                                maxWidth: "60%",
+                                                maxHeight: "60%",
+                                                objectFit: "contain",
+                                            }}
+                                        />
+                                    ) : (
+                                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                                            <polyline points="21 15 16 10 5 21"/>
+                                        </svg>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     )}
                     <div style={{ padding: 24 }}>

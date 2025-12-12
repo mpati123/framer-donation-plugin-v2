@@ -1,6 +1,6 @@
 {
   "id": "donate",
   "name": "Donation & Fundraising",
-  "modes": ["canvas"],
+  "modes": ["canvas", "code"],
   "icon": "/icon.svg"
 }
