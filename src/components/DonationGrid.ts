@@ -483,9 +483,11 @@ export default function DonationGrid({
                                 alt={detailCampaign.title}
                                 style={{
                                     width: "100%",
-                                    height: 250,
-                                    objectFit: "cover",
+                                    height: "auto",
+                                    maxHeight: "50vh",
+                                    objectFit: "contain",
                                     display: "block",
+                                    backgroundColor: "#f5f5f5",
                                 }}
                             />
                         ) : settings?.logo_url ? (

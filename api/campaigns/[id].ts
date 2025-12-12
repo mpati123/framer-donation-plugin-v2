@@ -119,6 +119,7 @@ async function handlePut(req: VercelRequest, res: VercelResponse, id: string) {
         description,
         excerpt,
         image_url,
+        images,
         beneficiary,
         goal_amount,
         end_date,
@@ -142,6 +143,7 @@ async function handlePut(req: VercelRequest, res: VercelResponse, id: string) {
     if (description !== undefined) updates.description = description?.trim() || null
     if (excerpt !== undefined) updates.excerpt = excerpt?.trim() || null
     if (image_url !== undefined) updates.image_url = image_url || null
+    if (images !== undefined) updates.images = Array.isArray(images) ? images : []
     if (beneficiary !== undefined) updates.beneficiary = beneficiary?.trim() || null
 
     if (goal_amount !== undefined) {
