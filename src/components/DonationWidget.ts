@@ -32,7 +32,7 @@ interface Settings {
 }
 
 // Plugin version - must match api/version/index.ts
-const COMPONENT_VERSION = "1.2.0"
+const COMPONENT_VERSION = "1.0.0"
 
 interface VersionInfo {
     version: string
