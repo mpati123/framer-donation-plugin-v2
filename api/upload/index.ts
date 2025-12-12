@@ -3,10 +3,20 @@
  *
  * Upload image to Supabase Storage
  * Accepts base64 encoded image data
+ * Max file size: ~4MB (Vercel limit)
  */
 
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 import { createClient } from "@supabase/supabase-js"
+
+// Increase body size limit for Vercel
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: "10mb",
+        },
+    },
+}
 
 const supabase = createClient(
     process.env.SUPABASE_URL!,

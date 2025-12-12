@@ -1050,7 +1050,48 @@
             });
         }
 
+        // Compress image before upload
+        async function compressImage(file, maxWidth = 1600, quality = 0.8) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        // Scale down if larger than maxWidth
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Convert to blob
+                        canvas.toBlob((blob) => {
+                            resolve(new File([blob], file.name, { type: 'image/jpeg' }));
+                        }, 'image/jpeg', quality);
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
         async function uploadImage(file) {
+            // Compress image if larger than 500KB
+            let fileToUpload = file;
+            if (file.size > 500 * 1024) {
+                fileToUpload = await compressImage(file, 1600, 0.8);
+                console.log(`Compressed: ${(file.size / 1024).toFixed(0)}KB -> ${(fileToUpload.size / 1024).toFixed(0)}KB`);
+            }
+
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.onload = async () => {
@@ -1063,10 +1104,19 @@
                             },
                             body: JSON.stringify({
                                 image: reader.result,
-                                filename: file.name,
-                                contentType: file.type
+                                filename: fileToUpload.name,
+                                contentType: 'image/jpeg'
                             })
                         });
+
+                        // Handle non-JSON responses (e.g., Vercel error pages)
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            if (response.status === 413) {
+                                throw new Error('Plik jest za duży. Spróbuj mniejsze zdjęcie.');
+                            }
+                            throw new Error('Błąd serwera. Spróbuj ponownie.');
+                        }
 
                         const data = await response.json();
                         if (response.ok) {
@@ -1079,7 +1129,7 @@
                     }
                 };
                 reader.onerror = () => reject(new Error('Failed to read file'));
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(fileToUpload);
             });
         }
 

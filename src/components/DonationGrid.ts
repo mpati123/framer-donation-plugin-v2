@@ -9,6 +9,7 @@ interface Campaign {
     description: string
     excerpt: string
     image_url: string
+    images: string[]
     goal_amount: number
     collected_amount: number
     donations_count: number
@@ -106,7 +107,10 @@ export default function DonationGrid({
     const [settings, setSettings] = useState<Settings | null>(null)
     const [loading, setLoading] = useState(true)
 
-    // Modal state
+    // Detail modal state (full campaign info)
+    const [detailCampaign, setDetailCampaign] = useState<Campaign | null>(null)
+
+    // Donate modal state (form)
     const [modalCampaign, setModalCampaign] = useState<Campaign | null>(null)
     const [donations, setDonations] = useState<Donation[]>([])
     const [loadingDonations, setLoadingDonations] = useState(false)
@@ -155,7 +159,16 @@ export default function DonationGrid({
             .catch(() => setLoading(false))
     }, [apiUrl, campaignIds])
 
-    const openModal = async (campaign: Campaign) => {
+    const openDetailModal = (campaign: Campaign) => {
+        setDetailCampaign(campaign)
+    }
+
+    const closeDetailModal = () => {
+        setDetailCampaign(null)
+    }
+
+    const openDonateModal = async (campaign: Campaign) => {
+        setDetailCampaign(null) // Close detail modal if open
         setModalCampaign(campaign)
         setError(null)
         resetForm()
@@ -173,7 +186,7 @@ export default function DonationGrid({
         }
     }
 
-    const closeModal = () => {
+    const closeDonateModal = () => {
         setModalCampaign(null)
         setDonations([])
         resetForm()
@@ -307,6 +320,7 @@ export default function DonationGrid({
                     return (
                         <div
                             key={campaign.id}
+                            onClick={() => openDetailModal(campaign)}
                             style={{
                                 background: "#fff",
                                 borderRadius,
@@ -314,6 +328,16 @@ export default function DonationGrid({
                                 boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
                                 display: "flex",
                                 flexDirection: "column",
+                                cursor: "pointer",
+                                transition: "transform 0.2s, box-shadow 0.2s",
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.transform = "translateY(-4px)"
+                                e.currentTarget.style.boxShadow = "0 8px 30px rgba(0,0,0,0.12)"
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.transform = "translateY(0)"
+                                e.currentTarget.style.boxShadow = "0 4px 20px rgba(0,0,0,0.08)"
                             }}
                         >
                             {showImage && (
@@ -324,8 +348,7 @@ export default function DonationGrid({
                                             alt={campaign.title}
                                             style={{
                                                 width: "100%",
-                                                height: 180,
-                                                objectFit: "cover",
+                                                height: "auto",
                                                 display: "block",
                                             }}
                                         />
@@ -396,7 +419,7 @@ export default function DonationGrid({
                                 )}
                                 {showDonateButton && (
                                     <button
-                                        onClick={() => openModal(campaign)}
+                                        onClick={(e) => { e.stopPropagation(); openDonateModal(campaign) }}
                                         style={{
                                             marginTop: 16,
                                             padding: "12px 20px",
@@ -423,7 +446,215 @@ export default function DonationGrid({
                 })}
             </div>
 
-            {/* Modal */}
+            {/* Detail Modal - Full campaign info */}
+            {detailCampaign && (
+                <div
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: "rgba(0,0,0,0.6)",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 9999,
+                        padding: 20,
+                    }}
+                    onClick={closeDetailModal}
+                >
+                    <div
+                        style={{
+                            background: "#fff",
+                            borderRadius: borderRadius + 8,
+                            maxWidth: 600,
+                            width: "100%",
+                            maxHeight: "90vh",
+                            overflow: "auto",
+                            position: "relative",
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Main Image */}
+                        {detailCampaign.image_url ? (
+                            <img
+                                src={detailCampaign.image_url}
+                                alt={detailCampaign.title}
+                                style={{
+                                    width: "100%",
+                                    height: 250,
+                                    objectFit: "cover",
+                                    display: "block",
+                                }}
+                            />
+                        ) : settings?.logo_url ? (
+                            <div style={{
+                                width: "100%",
+                                height: 200,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                backgroundColor: "#e5e7eb",
+                            }}>
+                                <img
+                                    src={settings.logo_url}
+                                    alt="Logo"
+                                    style={{
+                                        maxWidth: "50%",
+                                        maxHeight: "50%",
+                                        objectFit: "contain",
+                                    }}
+                                />
+                            </div>
+                        ) : null}
+
+                        {/* Close button */}
+                        <button
+                            onClick={closeDetailModal}
+                            style={{
+                                position: "absolute",
+                                top: 12,
+                                right: 12,
+                                background: "rgba(255,255,255,0.9)",
+                                border: "none",
+                                cursor: "pointer",
+                                padding: 8,
+                                color: "#666",
+                                borderRadius: "50%",
+                                width: 36,
+                                height: 36,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                            }}
+                        >
+                            <CloseIcon size={20} />
+                        </button>
+
+                        {/* Content */}
+                        <div style={{ padding: 24 }}>
+                            <h2 style={{ fontSize: 22, fontWeight: 700, margin: "0 0 8px 0" }}>
+                                {detailCampaign.title}
+                            </h2>
+
+                            {detailCampaign.beneficiary && (
+                                <p style={{ fontSize: 14, color: primaryColor, margin: "0 0 16px 0", fontWeight: 500 }}>
+                                    Dla: {detailCampaign.beneficiary}
+                                </p>
+                            )}
+
+                            {/* Progress */}
+                            <div style={{ marginBottom: 20, padding: 16, background: "#f9fafb", borderRadius: 12 }}>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 15 }}>
+                                    <span style={{ fontWeight: 700 }}>{formatCurrency(detailCampaign.collected_amount)}</span>
+                                    <span style={{ color: "#666" }}>z {formatCurrency(detailCampaign.goal_amount)}</span>
+                                </div>
+                                <div style={{ height: 12, background: "#e5e7eb", borderRadius: 6, overflow: "hidden" }}>
+                                    <div style={{
+                                        height: "100%",
+                                        width: \`\${Math.min(Math.round((detailCampaign.collected_amount / detailCampaign.goal_amount) * 100), 100)}%\`,
+                                        background: primaryColor,
+                                        borderRadius: 6,
+                                    }} />
+                                </div>
+                                <div style={{ display: "flex", justifyContent: "space-between", marginTop: 8, fontSize: 12, color: "#666" }}>
+                                    <span style={{ fontWeight: 600, color: primaryColor }}>
+                                        {Math.round((detailCampaign.collected_amount / detailCampaign.goal_amount) * 100)}%
+                                    </span>
+                                    <span>{detailCampaign.donations_count} darczyńców</span>
+                                </div>
+                            </div>
+
+                            {/* Donate Button */}
+                            <button
+                                onClick={() => openDonateModal(detailCampaign)}
+                                style={{
+                                    width: "100%",
+                                    padding: "16px 24px",
+                                    backgroundColor: primaryColor,
+                                    color: "#fff",
+                                    border: "none",
+                                    borderRadius: 30,
+                                    fontSize: 16,
+                                    fontWeight: 600,
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 8,
+                                    marginBottom: 24,
+                                }}
+                            >
+                                <HeartIcon color="#fff" size={18} /> Wesprzyj zbiórkę
+                            </button>
+
+                            {/* Full Description */}
+                            {detailCampaign.description && (
+                                <div style={{ marginBottom: 24 }}>
+                                    <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#333" }}>
+                                        O zbiórce
+                                    </h4>
+                                    <p style={{
+                                        fontSize: 14,
+                                        color: "#555",
+                                        lineHeight: 1.7,
+                                        whiteSpace: "pre-wrap",
+                                        margin: 0,
+                                    }}>
+                                        {detailCampaign.description}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* Gallery */}
+                            {detailCampaign.images && detailCampaign.images.length > 0 && (
+                                <div>
+                                    <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#333" }}>
+                                        Galeria
+                                    </h4>
+                                    <div style={{
+                                        display: "grid",
+                                        gridTemplateColumns: detailCampaign.images.length === 1 ? "1fr" : "repeat(2, 1fr)",
+                                        gap: 10,
+                                    }}>
+                                        {detailCampaign.images.map((imgUrl, index) => (
+                                            <div
+                                                key={index}
+                                                style={{
+                                                    width: "100%",
+                                                    paddingBottom: detailCampaign.images.length === 1 ? "56%" : "75%",
+                                                    position: "relative",
+                                                    borderRadius: 10,
+                                                    overflow: "hidden",
+                                                    cursor: "pointer",
+                                                }}
+                                                onClick={() => window.open(imgUrl, "_blank")}
+                                            >
+                                                <img
+                                                    src={imgUrl}
+                                                    alt={\`Zdjęcie \${index + 1}\`}
+                                                    style={{
+                                                        position: "absolute",
+                                                        top: 0,
+                                                        left: 0,
+                                                        width: "100%",
+                                                        height: "100%",
+                                                        objectFit: "cover",
+                                                    }}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Donate Modal - Form */}
             {modalCampaign && (
                 <div
                     style={{
@@ -439,7 +670,7 @@ export default function DonationGrid({
                         zIndex: 9999,
                         padding: 20,
                     }}
-                    onClick={closeModal}
+                    onClick={closeDonateModal}
                 >
                     <div
                         style={{
@@ -474,7 +705,7 @@ export default function DonationGrid({
                                 )}
                             </div>
                             <button
-                                onClick={closeModal}
+                                onClick={closeDonateModal}
                                 style={{
                                     background: "none",
                                     border: "none",
