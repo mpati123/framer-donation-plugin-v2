@@ -251,6 +251,18 @@ Dzięki Waszej pomocy możemy zapewnić mu leczenie i nowy dom.
 
 Zdjęcia użyte w opisie (`[1]`, `[2]` itd.) nie będą wyświetlane w galerii na dole - pojawią się tylko w miejscu, gdzie je wstawiłeś. Pozostałe zdjęcia (niewykorzystane w opisie) wyświetlą się w sekcji "Galeria".
 
+### Aktualizacje komponentów
+
+Komponenty automatycznie sprawdzają czy jest dostępna nowsza wersja. Gdy wdrożysz nową wersję API na Vercel, użytkownicy zobaczą pomarańczowy banner z informacją o aktualizacji.
+
+**Aby zaktualizować wersję:**
+1. Zmień `PLUGIN_VERSION` w pliku `api/version/index.ts`
+2. Zmień `COMPONENT_VERSION` w plikach:
+   - `src/components/DonationWidget.ts`
+   - `src/components/DonationGrid.ts`
+3. Wdróż zmiany na Vercel
+4. Skopiuj nowe kody komponentów z buildera do Framera
+
 ---
 
 ## API Reference

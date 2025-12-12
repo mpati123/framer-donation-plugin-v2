@@ -31,6 +31,14 @@ interface Settings {
     primary_color?: string
 }
 
+// Plugin version - must match api/version/index.ts
+const COMPONENT_VERSION = "1.0.0"
+
+interface VersionInfo {
+    version: string
+    changelog: string
+}
+
 interface Props {
     campaignId?: string
     apiUrl?: string
@@ -95,6 +103,50 @@ function CloseIcon({ size = 24 }: { size?: number }) {
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
+    )
+}
+
+function UpdateBanner({ changelog, onDismiss }: { changelog: string; onDismiss: () => void }) {
+    return (
+        <div style={{
+            background: "linear-gradient(135deg, #ff9800 0%, #f57c00 100%)",
+            color: "#fff",
+            padding: "12px 16px",
+            borderRadius: 8,
+            marginBottom: 16,
+            fontSize: 13,
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 12,
+            boxShadow: "0 2px 8px rgba(255, 152, 0, 0.3)",
+        }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style={{ flexShrink: 0, marginTop: 2 }}>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+            </svg>
+            <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 600, marginBottom: 4 }}>Dostępna aktualizacja komponentu</div>
+                <div style={{ opacity: 0.9, lineHeight: 1.4 }}>{changelog}</div>
+                <div style={{ marginTop: 8, fontSize: 11, opacity: 0.8 }}>
+                    Skopiuj nowy kod z buildera i wklej do Framera
+                </div>
+            </div>
+            <button
+                onClick={onDismiss}
+                style={{
+                    background: "rgba(255,255,255,0.2)",
+                    border: "none",
+                    color: "#fff",
+                    cursor: "pointer",
+                    padding: 4,
+                    borderRadius: 4,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                }}
+            >
+                <CloseIcon size={16} />
+            </button>
+        </div>
     )
 }
 
@@ -233,6 +285,10 @@ export default function DonationWidget({
     const [formLoading, setFormLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
+    // Version check state
+    const [updateAvailable, setUpdateAvailable] = useState<VersionInfo | null>(null)
+    const [updateDismissed, setUpdateDismissed] = useState(false)
+
     const scrollToForm = () => {
         formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
     }
@@ -256,6 +312,20 @@ export default function DonationWidget({
         })
         .catch(() => setLoading(false))
     }, [campaignId, apiUrl, donorsLimit, showDonors])
+
+    // Check for updates
+    useEffect(() => {
+        if (!apiUrl) return
+
+        fetch(\`\${apiUrl}/version\`)
+            .then(r => r.json())
+            .then(data => {
+                if (data.version && data.version !== COMPONENT_VERSION) {
+                    setUpdateAvailable({ version: data.version, changelog: data.changelog || "Nowa wersja dostępna" })
+                }
+            })
+            .catch(() => {}) // Ignore errors - version check is optional
+    }, [apiUrl])
 
     const handleDonate = async (amount: number) => {
         setFormLoading(true)
@@ -366,6 +436,14 @@ export default function DonationWidget({
             maxWidth: 450,
             overflow: "hidden",
         }}>
+            {/* Update Banner */}
+            {updateAvailable && !updateDismissed && (
+                <UpdateBanner
+                    changelog={updateAvailable.changelog}
+                    onDismiss={() => setUpdateDismissed(true)}
+                />
+            )}
+
             {/* Campaign Card */}
             {showCard && (
                 <div
