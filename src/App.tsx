@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import "./App.css"
 
 import { getDonationWidgetCode } from "./components/DonationWidget"
+import { getDonationGridCode } from "./components/DonationGrid"
 
 interface Campaign {
     id: string
@@ -25,6 +26,7 @@ interface WidgetOptions {
 }
 
 const WIDGET_FILE_NAME = "DonationWidget.tsx"
+const GRID_FILE_NAME = "DonationGrid.tsx"
 
 const SECTION_INFO = {
     showCard: { name: "Karta zbiórki", description: "Zdjęcie, tytuł, opis" },
@@ -37,18 +39,19 @@ const SECTION_INFO = {
 framer.showUI({
     position: "top right",
     width: 340,
-    height: 600,
+    height: 650,
 })
 
 export function App() {
     const [apiUrl, setApiUrl] = useState("")
     const [apiKey, setApiKey] = useState("")
     const [campaigns, setCampaigns] = useState<Campaign[]>([])
-    const [selectedCampaign, setSelectedCampaign] = useState<string>("")
+    const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([])
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [isConfigured, setIsConfigured] = useState(false)
     const [adding, setAdding] = useState(false)
+    const [updating, setUpdating] = useState(false)
     const [widgetOptions, setWidgetOptions] = useState<WidgetOptions>({
         showCard: true,
         showProgress: true,
@@ -105,15 +108,23 @@ export function App() {
         setApiUrl("")
         setApiKey("")
         setCampaigns([])
-        setSelectedCampaign("")
+        setSelectedCampaigns([])
         setIsConfigured(false)
     }
 
-    const ensureWidgetExists = async (): Promise<string | null> => {
+    const toggleCampaign = (id: string) => {
+        setSelectedCampaigns(prev =>
+            prev.includes(id)
+                ? prev.filter(c => c !== id)
+                : [...prev, id]
+        )
+    }
+
+    const ensureWidgetExists = async (forceUpdate = false): Promise<string | null> => {
         const existingFiles = await framer.getCodeFiles()
         const existingFile = existingFiles.find(f => f.name === WIDGET_FILE_NAME)
 
-        if (existingFile) {
+        if (existingFile && !forceUpdate) {
             const componentExport = existingFile.exports.find(e => e.type === "component")
             if (componentExport && 'insertURL' in componentExport) {
                 return (componentExport as { insertURL: string }).insertURL
@@ -121,20 +132,15 @@ export function App() {
             return null
         }
 
-        // Check permission
         const canCreate = await framer.isAllowedTo("createCodeFile")
         if (!canCreate) {
             setError("Brak uprawnień do tworzenia plików kodu")
             return null
         }
 
-        // Create widget file
         await framer.createCodeFile(WIDGET_FILE_NAME, getDonationWidgetCode())
-
-        // Wait for processing
         await new Promise(resolve => setTimeout(resolve, 500))
 
-        // Re-fetch
         const updatedFiles = await framer.getCodeFiles()
         const updatedFile = updatedFiles.find(f => f.name === WIDGET_FILE_NAME)
 
@@ -148,11 +154,57 @@ export function App() {
         return null
     }
 
-    const handleAddWidget = async () => {
-        if (!selectedCampaign) {
-            setError("Wybierz zbiórkę")
-            return
+    const ensureGridExists = async (forceUpdate = false): Promise<string | null> => {
+        const existingFiles = await framer.getCodeFiles()
+        const existingFile = existingFiles.find(f => f.name === GRID_FILE_NAME)
+
+        if (existingFile && !forceUpdate) {
+            const componentExport = existingFile.exports.find(e => e.type === "component")
+            if (componentExport && 'insertURL' in componentExport) {
+                return (componentExport as { insertURL: string }).insertURL
+            }
+            return null
         }
+
+        const canCreate = await framer.isAllowedTo("createCodeFile")
+        if (!canCreate) {
+            setError("Brak uprawnień do tworzenia plików kodu")
+            return null
+        }
+
+        await framer.createCodeFile(GRID_FILE_NAME, getDonationGridCode())
+        await new Promise(resolve => setTimeout(resolve, 500))
+
+        const updatedFiles = await framer.getCodeFiles()
+        const updatedFile = updatedFiles.find(f => f.name === GRID_FILE_NAME)
+
+        if (updatedFile) {
+            const componentExport = updatedFile.exports.find(e => e.type === "component")
+            if (componentExport && 'insertURL' in componentExport) {
+                return (componentExport as { insertURL: string }).insertURL
+            }
+        }
+
+        return null
+    }
+
+    const handleUpdateCode = async () => {
+        setUpdating(true)
+        setError(null)
+
+        try {
+            await ensureWidgetExists(true)
+            await ensureGridExists(true)
+            framer.notify("Kod zaktualizowany!")
+        } catch (err) {
+            setError(`Błąd aktualizacji: ${err instanceof Error ? err.message : String(err)}`)
+        } finally {
+            setUpdating(false)
+        }
+    }
+
+    const handleAddWidget = async () => {
+        if (selectedCampaigns.length !== 1) return
 
         setAdding(true)
         setError(null)
@@ -169,7 +221,7 @@ export function App() {
                 url: widgetUrl,
                 attributes: {
                     controls: {
-                        campaignId: selectedCampaign,
+                        campaignId: selectedCampaigns[0],
                         apiUrl: apiUrl,
                         ...widgetOptions,
                     }
@@ -177,6 +229,39 @@ export function App() {
             })
 
             framer.notify("Dodano widget zbiórki")
+        } catch (err) {
+            console.error('Error:', err)
+            setError(`Błąd: ${err instanceof Error ? err.message : String(err)}`)
+        } finally {
+            setAdding(false)
+        }
+    }
+
+    const handleAddGrid = async () => {
+        if (selectedCampaigns.length < 2) return
+
+        setAdding(true)
+        setError(null)
+
+        try {
+            const gridUrl = await ensureGridExists()
+
+            if (!gridUrl) {
+                setError("Nie udało się utworzyć komponentu")
+                return
+            }
+
+            await framer.addComponentInstance({
+                url: gridUrl,
+                attributes: {
+                    controls: {
+                        apiUrl: apiUrl,
+                        campaignIds: selectedCampaigns.join(", "),
+                    }
+                }
+            })
+
+            framer.notify("Dodano siatkę zbiórek")
         } catch (err) {
             console.error('Error:', err)
             setError(`Błąd: ${err instanceof Error ? err.message : String(err)}`)
@@ -230,89 +315,116 @@ export function App() {
         )
     }
 
-    const selectedCampaignData = campaigns.find((c) => c.id === selectedCampaign)
-
     const toggleOption = (key: keyof WidgetOptions) => {
         setWidgetOptions(prev => ({ ...prev, [key]: !prev[key] }))
     }
 
     const selectedCount = Object.values(widgetOptions).filter(Boolean).length
+    const isSingleSelected = selectedCampaigns.length === 1
+    const isMultipleSelected = selectedCampaigns.length > 1
 
     // Main screen
     return (
         <div id="donation-plugin-root">
             <div className="header-row">
                 <h1>Donation Plugin</h1>
-                <button className="btn-secondary" onClick={handleDisconnect}>
-                    Rozłącz
-                </button>
+                <div style={{ display: "flex", gap: 8 }}>
+                    <button
+                        className="btn-secondary"
+                        onClick={handleUpdateCode}
+                        disabled={updating}
+                        title="Aktualizuj kod komponentów"
+                    >
+                        {updating ? "..." : "↻"}
+                    </button>
+                    <button className="btn-secondary" onClick={handleDisconnect}>
+                        Rozłącz
+                    </button>
+                </div>
             </div>
 
             {error && <div className="error">{error}</div>}
 
             <div className="form-group">
-                <label>Wybierz zbiórkę</label>
+                <label>Wybierz zbiórki ({selectedCampaigns.length} zaznaczonych)</label>
                 {loading ? (
                     <div className="loading">Ładowanie...</div>
                 ) : (
-                    <select
-                        value={selectedCampaign}
-                        onChange={(e) => setSelectedCampaign(e.target.value)}
-                    >
-                        <option value="">-- Wybierz zbiórkę --</option>
+                    <div className="campaign-list">
                         {campaigns.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.title} ({c.collected_amount.toLocaleString('pl-PL')}/{c.goal_amount.toLocaleString('pl-PL')} zł)
-                            </option>
+                            <label
+                                key={c.id}
+                                className={`campaign-checkbox ${selectedCampaigns.includes(c.id) ? 'selected' : ''}`}
+                            >
+                                <input
+                                    type="checkbox"
+                                    checked={selectedCampaigns.includes(c.id)}
+                                    onChange={() => toggleCampaign(c.id)}
+                                />
+                                <div className="campaign-checkbox-content">
+                                    {c.image_url && (
+                                        <div
+                                            className="campaign-thumb"
+                                            style={{ backgroundImage: `url(${c.image_url})` }}
+                                        />
+                                    )}
+                                    <div className="campaign-info">
+                                        <div className="campaign-title">{c.title}</div>
+                                        <div className="campaign-stats">
+                                            {c.collected_amount.toLocaleString('pl-PL')} / {c.goal_amount.toLocaleString('pl-PL')} zł
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
                         ))}
-                    </select>
+                    </div>
                 )}
             </div>
 
-            {selectedCampaignData && (
-                <div className="campaign-preview">
-                    {selectedCampaignData.image_url && (
-                        <div
-                            className="preview-image"
-                            style={{ backgroundImage: `url(${selectedCampaignData.image_url})` }}
-                        />
-                    )}
-                    <div className="preview-info">
-                        <div className="preview-title">{selectedCampaignData.title}</div>
-                        {selectedCampaignData.beneficiary && (
-                            <div className="preview-beneficiary">Dla: {selectedCampaignData.beneficiary}</div>
-                        )}
-                        <div className="preview-stats">
-                            {selectedCampaignData.collected_amount.toLocaleString('pl-PL')} / {selectedCampaignData.goal_amount.toLocaleString('pl-PL')} zł
+            {isSingleSelected && (
+                <>
+                    <div className="form-group">
+                        <label>Wybierz sekcje widgetu</label>
+                        <div className="component-grid">
+                            {(Object.keys(SECTION_INFO) as (keyof typeof SECTION_INFO)[]).map((key) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    className={`component-card ${widgetOptions[key] ? "active" : ""}`}
+                                    onClick={() => toggleOption(key)}
+                                >
+                                    <span className="component-name">{SECTION_INFO[key].name}</span>
+                                    <span className="component-desc">{SECTION_INFO[key].description}</span>
+                                </button>
+                            ))}
                         </div>
                     </div>
-                </div>
+
+                    <button
+                        className="btn-primary"
+                        onClick={handleAddWidget}
+                        disabled={adding || selectedCount === 0}
+                    >
+                        {adding ? "Dodawanie..." : `Dodaj widget na canvas`}
+                    </button>
+                </>
             )}
 
-            <div className="form-group">
-                <label>Wybierz sekcje widgetu</label>
-                <div className="component-grid">
-                    {(Object.keys(SECTION_INFO) as (keyof typeof SECTION_INFO)[]).map((key) => (
-                        <button
-                            key={key}
-                            type="button"
-                            className={`component-card ${widgetOptions[key] ? "active" : ""}`}
-                            onClick={() => toggleOption(key)}
-                        >
-                            <span className="component-name">{SECTION_INFO[key].name}</span>
-                            <span className="component-desc">{SECTION_INFO[key].description}</span>
-                        </button>
-                    ))}
-                </div>
-            </div>
+            {isMultipleSelected && (
+                <button
+                    className="btn-primary"
+                    onClick={handleAddGrid}
+                    disabled={adding}
+                >
+                    {adding ? "Dodawanie..." : `Dodaj siatkę ${selectedCampaigns.length} zbiórek`}
+                </button>
+            )}
 
-            <button
-                className="btn-primary"
-                onClick={handleAddWidget}
-                disabled={!selectedCampaign || adding || selectedCount === 0}
-            >
-                {adding ? "Dodawanie..." : `Dodaj widget (${selectedCount}) na canvas`}
-            </button>
+            {selectedCampaigns.length === 0 && (
+                <div className="hint">
+                    Zaznacz jedną zbiórkę aby dodać widget, lub wiele aby dodać siatkę
+                </div>
+            )}
         </div>
     )
 }

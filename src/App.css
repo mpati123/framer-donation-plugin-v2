@@ -313,3 +313,107 @@
 #donation-plugin-root .btn-secondary:hover {
     background: #555;
 }
+
+#donation-plugin-root .btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Campaign list with checkboxes */
+#donation-plugin-root .campaign-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+#donation-plugin-root .campaign-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+#donation-plugin-root .campaign-list::-webkit-scrollbar-track {
+    background: #2a2a2a;
+    border-radius: 3px;
+}
+
+#donation-plugin-root .campaign-list::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 3px;
+}
+
+#donation-plugin-root .campaign-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    background: #2a2a2a;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#donation-plugin-root .campaign-checkbox:hover {
+    background: #333;
+}
+
+#donation-plugin-root .campaign-checkbox.selected {
+    border-color: #0099ff;
+    background: #1a3a4a;
+}
+
+#donation-plugin-root .campaign-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    accent-color: #0099ff;
+    cursor: pointer;
+}
+
+#donation-plugin-root .campaign-checkbox-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+}
+
+#donation-plugin-root .campaign-thumb {
+    width: 40px;
+    height: 40px;
+    border-radius: 6px;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+#donation-plugin-root .campaign-info {
+    flex: 1;
+    min-width: 0;
+}
+
+#donation-plugin-root .campaign-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#donation-plugin-root .campaign-stats {
+    font-size: 11px;
+    color: #999;
+    margin-top: 2px;
+}
+
+#donation-plugin-root .hint {
+    font-size: 12px;
+    color: #888;
+    text-align: center;
+    padding: 20px;
+    background: #2a2a2a;
+    border-radius: 8px;
+}

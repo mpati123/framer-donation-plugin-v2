@@ -276,13 +276,17 @@ export default function DonationWidget({
                     boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
                 }}>
                     {showImage && campaign.image_url && (
-                        <div style={{
-                            width: "100%",
-                            height: 200,
-                            backgroundImage: \`url(\${campaign.image_url})\`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                        }} />
+                        <div style={{ backgroundColor: "#f5f5f5" }}>
+                            <img
+                                src={campaign.image_url}
+                                alt={campaign.title}
+                                style={{
+                                    width: "100%",
+                                    height: "auto",
+                                    display: "block",
+                                }}
+                            />
+                        </div>
                     )}
                     <div style={{ padding: 24 }}>
                         <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8, margin: 0 }}>{campaign.title}</h3>
