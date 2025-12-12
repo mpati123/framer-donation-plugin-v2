@@ -32,7 +32,7 @@ interface Settings {
 }
 
 // Plugin version - must match api/version/index.ts
-const COMPONENT_VERSION = "1.0.0"
+const COMPONENT_VERSION = "1.2.0"
 
 interface VersionInfo {
     version: string
@@ -294,9 +294,19 @@ export default function DonationGrid({
             .catch(() => setLoading(false))
     }, [apiUrl, campaignIds])
 
-    // Check for updates
+    // Check for updates - only in Framer editor, not on published site
     useEffect(() => {
         if (!apiUrl) return
+
+        // Detect if we're in Framer editor (canvas preview)
+        const isFramerEditor = typeof window !== "undefined" && (
+            window.location.hostname.includes("framer.website") === false &&
+            window.location.hostname.includes("framer.app") ||
+            window.location.hostname === "localhost" ||
+            window.parent !== window // iframe = editor preview
+        )
+
+        if (!isFramerEditor) return
 
         fetch(\`\${apiUrl}/version\`)
             .then(r => r.json())
