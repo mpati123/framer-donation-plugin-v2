@@ -82,6 +82,85 @@ function CloseIcon({ size = 24 }: { size?: number }) {
     )
 }
 
+// Parse description with image placeholders like [1], [2], etc.
+function parseDescriptionWithImages(description: string, images: string[]): React.ReactNode[] {
+    if (!description) return []
+
+    const parts: React.ReactNode[] = []
+    const regex = /\[(\d+)\]/g
+    let lastIndex = 0
+    let match
+    let key = 0
+
+    while ((match = regex.exec(description)) !== null) {
+        // Add text before the match
+        if (match.index > lastIndex) {
+            const textBefore = description.substring(lastIndex, match.index)
+            parts.push(
+                <span key={key++} style={{ whiteSpace: "pre-wrap" }}>
+                    {textBefore}
+                </span>
+            )
+        }
+
+        // Add the image if it exists
+        const imageIndex = parseInt(match[1], 10) - 1 // [1] = index 0
+        if (images && imageIndex >= 0 && imageIndex < images.length) {
+            parts.push(
+                <img
+                    key={key++}
+                    src={images[imageIndex]}
+                    alt={\`Zdjęcie \${imageIndex + 1}\`}
+                    style={{
+                        width: "100%",
+                        height: "auto",
+                        borderRadius: 10,
+                        margin: "16px 0",
+                        display: "block",
+                        cursor: "pointer",
+                    }}
+                    onClick={() => window.open(images[imageIndex], "_blank")}
+                />
+            )
+        } else {
+            // Keep the placeholder if image doesn't exist
+            parts.push(<span key={key++}>{match[0]}</span>)
+        }
+
+        lastIndex = regex.lastIndex
+    }
+
+    // Add remaining text
+    if (lastIndex < description.length) {
+        parts.push(
+            <span key={key++} style={{ whiteSpace: "pre-wrap" }}>
+                {description.substring(lastIndex)}
+            </span>
+        )
+    }
+
+    return parts
+}
+
+// Get images not used in description (for gallery at the bottom)
+function getUnusedImages(description: string, images: string[]): string[] {
+    if (!images || images.length === 0) return []
+    if (!description) return images
+
+    const usedIndices = new Set<number>()
+    const regex = /\[(\d+)\]/g
+    let match
+
+    while ((match = regex.exec(description)) !== null) {
+        const imageIndex = parseInt(match[1], 10) - 1
+        if (imageIndex >= 0 && imageIndex < images.length) {
+            usedIndices.add(imageIndex)
+        }
+    }
+
+    return images.filter((_, index) => !usedIndices.has(index))
+}
+
 export default function DonationGrid({
     apiUrl = "",
     campaignIds = "",
@@ -592,65 +671,54 @@ export default function DonationGrid({
                                 <HeartIcon color="#fff" size={18} /> Wesprzyj zbiórkę
                             </button>
 
-                            {/* Full Description */}
+                            {/* Full Description with inline images */}
                             {detailCampaign.description && (
                                 <div style={{ marginBottom: 24 }}>
                                     <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#333" }}>
                                         O zbiórce
                                     </h4>
-                                    <p style={{
+                                    <div style={{
                                         fontSize: 14,
                                         color: "#555",
                                         lineHeight: 1.7,
-                                        whiteSpace: "pre-wrap",
-                                        margin: 0,
                                     }}>
-                                        {detailCampaign.description}
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Gallery */}
-                            {detailCampaign.images && detailCampaign.images.length > 0 && (
-                                <div>
-                                    <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#333" }}>
-                                        Galeria
-                                    </h4>
-                                    <div style={{
-                                        display: "grid",
-                                        gridTemplateColumns: detailCampaign.images.length === 1 ? "1fr" : "repeat(2, 1fr)",
-                                        gap: 10,
-                                    }}>
-                                        {detailCampaign.images.map((imgUrl, index) => (
-                                            <div
-                                                key={index}
-                                                style={{
-                                                    width: "100%",
-                                                    paddingBottom: detailCampaign.images.length === 1 ? "56%" : "75%",
-                                                    position: "relative",
-                                                    borderRadius: 10,
-                                                    overflow: "hidden",
-                                                    cursor: "pointer",
-                                                }}
-                                                onClick={() => window.open(imgUrl, "_blank")}
-                                            >
-                                                <img
-                                                    src={imgUrl}
-                                                    alt={\`Zdjęcie \${index + 1}\`}
-                                                    style={{
-                                                        position: "absolute",
-                                                        top: 0,
-                                                        left: 0,
-                                                        width: "100%",
-                                                        height: "100%",
-                                                        objectFit: "cover",
-                                                    }}
-                                                />
-                                            </div>
-                                        ))}
+                                        {parseDescriptionWithImages(detailCampaign.description, detailCampaign.images || [])}
                                     </div>
                                 </div>
                             )}
+
+                            {/* Gallery - only unused images */}
+                            {(() => {
+                                const unusedImages = getUnusedImages(detailCampaign.description || "", detailCampaign.images || [])
+                                return unusedImages.length > 0 && (
+                                    <div>
+                                        <h4 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12, color: "#333" }}>
+                                            Galeria
+                                        </h4>
+                                        <div style={{
+                                            display: "flex",
+                                            flexDirection: "column",
+                                            gap: 10,
+                                        }}>
+                                            {unusedImages.map((imgUrl, index) => (
+                                                <img
+                                                    key={index}
+                                                    src={imgUrl}
+                                                    alt={\`Zdjęcie \${index + 1}\`}
+                                                    style={{
+                                                        width: "100%",
+                                                        height: "auto",
+                                                        borderRadius: 10,
+                                                        cursor: "pointer",
+                                                        display: "block",
+                                                    }}
+                                                    onClick={() => window.open(imgUrl, "_blank")}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )
+                            })()}
                         </div>
                     </div>
                 </div>
