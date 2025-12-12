@@ -103,7 +103,7 @@ function parseDescriptionWithImages(description: string, images: string[]): Reac
     if (!description) return []
 
     const parts: React.ReactNode[] = []
-    const regex = /\[(\d+)\]/g
+    const regex = /\\[(\\d+)\\]/g
     let lastIndex = 0
     let match
     let key = 0
@@ -164,7 +164,7 @@ function getUnusedImages(description: string, images: string[]): string[] {
     if (!description) return images
 
     const usedIndices = new Set<number>()
-    const regex = /\[(\d+)\]/g
+    const regex = /\\[(\\d+)\\]/g
     let match
 
     while ((match = regex.exec(description)) !== null) {

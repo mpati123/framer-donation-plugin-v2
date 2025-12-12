@@ -226,6 +226,30 @@ https://TWOJA-DOMENA.vercel.app/api
 - **Edycja zbiórek** - aktualizuj dane, zmień status
 - **Archiwizacja** - ukryj zakończone zbiórki
 - **Przywracanie** - odzyskaj zarchiwizowane zbiórki
+- **Galeria zdjęć** - dodaj wiele zdjęć do zbiórki
+
+### Zdjęcia w opisie zbiórki
+
+Możesz umieszczać zdjęcia z galerii bezpośrednio w tekście opisu używając składni `[numer]`:
+
+- `[1]` - wstawi pierwsze zdjęcie z galerii
+- `[2]` - wstawi drugie zdjęcie z galerii
+- `[3]` - wstawi trzecie zdjęcie itd.
+
+**Przykład opisu:**
+```
+Burek to 5-letni kundelek, który trafił do nas w ciężkim stanie.
+
+[1]
+
+Po wielu badaniach okazało się, że wymaga pilnej operacji.
+
+[2]
+
+Dzięki Waszej pomocy możemy zapewnić mu leczenie i nowy dom.
+```
+
+Zdjęcia użyte w opisie (`[1]`, `[2]` itd.) nie będą wyświetlane w galerii na dole - pojawią się tylko w miejscu, gdzie je wstawiłeś. Pozostałe zdjęcia (niewykorzystane w opisie) wyświetlą się w sekcji "Galeria".
 
 ---
 
