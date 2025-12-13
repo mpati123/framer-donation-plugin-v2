@@ -2,17 +2,17 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.LICENSE_STRIPE_SECRET_KEY!, {
   apiVersion: "2024-11-20.acacia",
 });
 
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.LICENSE_SUPABASE_URL!,
+  process.env.LICENSE_SUPABASE_SERVICE_KEY!
 );
 
 // Webhook secret for license subscriptions
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = process.env.LICENSE_STRIPE_WEBHOOK_SECRET!;
 
 // Generate license key: DPL-XXXX-XXXX-XXXX
 function generateLicenseKey(): string {

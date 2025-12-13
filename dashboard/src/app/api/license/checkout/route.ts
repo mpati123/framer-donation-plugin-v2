@@ -2,18 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.LICENSE_STRIPE_SECRET_KEY!, {
   apiVersion: "2025-04-30.basil",
 });
 
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.LICENSE_SUPABASE_URL!,
+  process.env.LICENSE_SUPABASE_SERVICE_KEY!
 );
 
 const PRICE_IDS = {
-  monthly: process.env.STRIPE_PRICE_MONTHLY!,
-  yearly: process.env.STRIPE_PRICE_YEARLY!,
+  monthly: process.env.LICENSE_STRIPE_PRICE_MONTHLY!,
+  yearly: process.env.LICENSE_STRIPE_PRICE_YEARLY!,
 };
 
 export async function POST(request: NextRequest) {

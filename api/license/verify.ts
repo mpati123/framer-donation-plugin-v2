@@ -3,8 +3,8 @@ import { createClient } from "@supabase/supabase-js";
 
 // Initialize Supabase client for licensing
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.LICENSE_SUPABASE_URL!,
+  process.env.LICENSE_SUPABASE_SERVICE_KEY!
 );
 
 interface LicenseVerifyRequest {

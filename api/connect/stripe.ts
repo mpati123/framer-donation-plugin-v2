@@ -2,13 +2,13 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.LICENSE_STRIPE_SECRET_KEY!, {
   apiVersion: "2024-11-20.acacia",
 });
 
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.LICENSE_SUPABASE_URL!,
+  process.env.LICENSE_SUPABASE_SERVICE_KEY!
 );
 
 const BASE_URL = process.env.BASE_URL || "https://yourdomain.com";

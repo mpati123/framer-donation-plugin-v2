@@ -2,13 +2,13 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+const stripe = new Stripe(process.env.LICENSE_STRIPE_SECRET_KEY!, {
   apiVersion: "2024-11-20.acacia",
 });
 
 const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_KEY!
+  process.env.LICENSE_SUPABASE_URL!,
+  process.env.LICENSE_SUPABASE_SERVICE_KEY!
 );
 
 interface CheckoutRequest {
@@ -21,8 +21,8 @@ interface CheckoutRequest {
 
 // Stripe Price IDs - create these in Stripe Dashboard
 const PRICE_IDS = {
-  monthly: process.env.STRIPE_PRICE_MONTHLY!, // 49 zł/month
-  yearly: process.env.STRIPE_PRICE_YEARLY!, // 499 zł/year
+  monthly: process.env.LICENSE_STRIPE_PRICE_MONTHLY!, // 49 zł/month
+  yearly: process.env.LICENSE_STRIPE_PRICE_YEARLY!, // 499 zł/year
 };
 
 export default async function handler(
