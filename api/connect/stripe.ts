@@ -2,7 +2,9 @@ import type { VercelRequest, VercelResponse } from "@vercel/node";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
-const stripe = new Stripe(process.env.LICENSE_STRIPE_SECRET_KEY!, {
+// Use STRIPE_SECRET_KEY for donations (with Connect enabled),
+// not LICENSE_STRIPE_SECRET_KEY which is for license subscriptions
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2023-10-16",
 });
 

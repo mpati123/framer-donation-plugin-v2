@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://framer-donation-plugin2.vercel.app";
+
 export default async function SettingsPage() {
   const supabase = await createClient();
   const {
@@ -113,7 +115,7 @@ export default async function SettingsPage() {
               będą trafiać bezpośrednio na Twoje konto.
             </p>
             <a
-              href={`/api/connect/stripe?organization_id=${organization?.id}`}
+              href={`${API_URL}/api/connect/stripe?license_key=${license?.license_key}`}
               className="inline-flex items-center gap-2 bg-[#635BFF] hover:bg-[#4f46e5] text-white px-4 py-2 rounded-lg font-medium transition-colors"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
