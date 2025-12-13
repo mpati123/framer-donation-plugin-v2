@@ -1,0 +1,970 @@
+/**
+ * LupusUrsus Donations - Frontend Styles
+ *
+ * @package LupusUrsus_Donations
+ */
+
+/* ==========================================================================
+   Variables
+   ========================================================================== */
+:root {
+    --lupusursus-primary: #e74c3c;
+    --lupusursus-primary-dark: #c0392b;
+    --lupusursus-secondary: #3498db;
+    --lupusursus-success: #27ae60;
+    --lupusursus-text: #2c3e50;
+    --lupusursus-text-light: #7f8c8d;
+    --lupusursus-border: #ecf0f1;
+    --lupusursus-bg: #f9f9f9;
+    --lupusursus-white: #ffffff;
+    --lupusursus-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --lupusursus-radius: 8px;
+    --lupusursus-transition: all 0.3s ease;
+}
+
+/* ==========================================================================
+   Campaign Card
+   ========================================================================== */
+.lupusursus-campaign {
+    background: var(--lupusursus-white);
+    border-radius: var(--lupusursus-radius);
+    box-shadow: var(--lupusursus-shadow);
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.lupusursus-campaign-image {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 16/9;
+}
+
+.lupusursus-campaign-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: var(--lupusursus-transition);
+}
+
+.lupusursus-campaign:hover .lupusursus-campaign-image img {
+    transform: scale(1.05);
+}
+
+.lupusursus-campaign-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: var(--lupusursus-primary);
+    color: var(--lupusursus-white);
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.lupusursus-campaign-badge--inactive {
+    background: var(--lupusursus-text-light);
+}
+
+.lupusursus-campaign-content {
+    padding: 25px;
+}
+
+.lupusursus-campaign-title {
+    margin: 0 0 10px;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--lupusursus-text);
+    line-height: 1.3;
+}
+
+.lupusursus-campaign-title a {
+    color: inherit;
+    text-decoration: none;
+    transition: var(--lupusursus-transition);
+}
+
+.lupusursus-campaign-title a:hover {
+    color: var(--lupusursus-primary);
+}
+
+.lupusursus-campaign-beneficiary {
+    margin: 0 0 15px;
+    font-size: 14px;
+    color: var(--lupusursus-text-light);
+}
+
+.lupusursus-campaign-beneficiary strong {
+    color: var(--lupusursus-text);
+}
+
+.lupusursus-campaign-description {
+    margin: 0 0 20px;
+    color: var(--lupusursus-text-light);
+    line-height: 1.6;
+}
+
+/* ==========================================================================
+   Progress Bar
+   ========================================================================== */
+.lupusursus-progress {
+    margin: 20px 0;
+}
+
+.lupusursus-progress-bar-container {
+    height: 12px;
+    background: var(--lupusursus-border);
+    border-radius: 6px;
+    overflow: hidden;
+    position: relative;
+}
+
+.lupusursus-progress-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 0.8s ease-out;
+    position: relative;
+    background: linear-gradient(90deg, var(--lupusursus-primary), var(--lupusursus-primary-dark));
+}
+
+/* Progress bar animation */
+.lupusursus-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: shelter-shimmer 2s infinite;
+}
+
+@keyframes shelter-shimmer {
+    0% {
+        transform: translateX(-100%);
+    }
+    100% {
+        transform: translateX(100%);
+    }
+}
+
+/* Progress style: striped */
+.lupusursus-progress-bar--striped {
+    background-image: linear-gradient(
+        45deg,
+        rgba(255, 255, 255, 0.15) 25%,
+        transparent 25%,
+        transparent 50%,
+        rgba(255, 255, 255, 0.15) 50%,
+        rgba(255, 255, 255, 0.15) 75%,
+        transparent 75%,
+        transparent
+    );
+    background-size: 40px 40px;
+    animation: shelter-stripes 1s linear infinite;
+}
+
+@keyframes shelter-stripes {
+    0% {
+        background-position: 40px 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+/* Progress style: gradient */
+.lupusursus-progress-bar--gradient {
+    background: linear-gradient(90deg, #f39c12, #e74c3c, #9b59b6);
+    background-size: 200% 100%;
+    animation: shelter-gradient 3s ease infinite;
+}
+
+@keyframes shelter-gradient {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+}
+
+.lupusursus-progress-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    font-size: 14px;
+}
+
+.lupusursus-progress-collected {
+    font-weight: 700;
+    font-size: 18px;
+    color: var(--lupusursus-text);
+}
+
+.lupusursus-progress-percentage {
+    font-weight: 600;
+    color: var(--lupusursus-primary);
+}
+
+.lupusursus-progress-goal {
+    color: var(--lupusursus-text-light);
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* ==========================================================================
+   Donate Button
+   ========================================================================== */
+.lupusursus-donate-btn {
+    display: inline-block;
+    background: var(--lupusursus-primary);
+    color: var(--lupusursus-white) !important;
+    padding: 14px 35px;
+    border: none;
+    border-radius: 30px;
+    font-size: 16px;
+    font-weight: 600;
+    text-decoration: none !important;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--lupusursus-transition);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3);
+}
+
+.lupusursus-donate-btn:hover {
+    background: var(--lupusursus-primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+}
+
+.lupusursus-donate-btn:active {
+    transform: translateY(0);
+}
+
+.lupusursus-donate-btn--full {
+    display: block;
+    width: 100%;
+}
+
+.lupusursus-donate-btn--small {
+    padding: 10px 25px;
+    font-size: 14px;
+}
+
+.lupusursus-donate-btn--widget {
+    display: block;
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px 20px;
+    font-size: 14px;
+}
+
+.lupusursus-donate-btn:disabled,
+.lupusursus-donate-btn--disabled {
+    background: var(--lupusursus-text-light);
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.lupusursus-donate-btn:disabled:hover,
+.lupusursus-donate-btn--disabled:hover {
+    transform: none;
+}
+
+/* ==========================================================================
+   Donation Form
+   ========================================================================== */
+.lupusursus-donation-form {
+    background: var(--lupusursus-white);
+    border-radius: var(--lupusursus-radius);
+    padding: 30px;
+    box-shadow: var(--lupusursus-shadow);
+}
+
+.lupusursus-donation-form h3 {
+    margin: 0 0 25px;
+    font-size: 20px;
+    color: var(--lupusursus-text);
+    text-align: center;
+}
+
+.lupusursus-form-group {
+    margin-bottom: 20px;
+}
+
+.lupusursus-form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--lupusursus-text);
+    font-size: 14px;
+}
+
+.lupusursus-form-group input[type="text"],
+.lupusursus-form-group input[type="email"],
+.lupusursus-form-group input[type="number"],
+.lupusursus-form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid var(--lupusursus-border);
+    border-radius: 6px;
+    font-size: 15px;
+    transition: var(--lupusursus-transition);
+    box-sizing: border-box;
+}
+
+.lupusursus-form-group input:focus,
+.lupusursus-form-group textarea:focus {
+    outline: none;
+    border-color: var(--lupusursus-primary);
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+}
+
+.lupusursus-form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.lupusursus-form-group small {
+    display: block;
+    margin-top: 5px;
+    color: var(--lupusursus-text-light);
+    font-size: 12px;
+}
+
+/* Amount buttons */
+.lupusursus-amount-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.lupusursus-amount-btn {
+    padding: 12px;
+    border: 2px solid var(--lupusursus-border);
+    border-radius: 6px;
+    background: var(--lupusursus-white);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--lupusursus-text);
+    cursor: pointer;
+    transition: var(--lupusursus-transition);
+}
+
+.lupusursus-amount-btn:hover {
+    border-color: var(--lupusursus-primary);
+    color: var(--lupusursus-primary);
+}
+
+.lupusursus-amount-btn.active {
+    background: var(--lupusursus-primary);
+    border-color: var(--lupusursus-primary);
+    color: var(--lupusursus-white);
+}
+
+/* Checkbox */
+.lupusursus-checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lupusursus-checkbox-group input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--lupusursus-primary);
+}
+
+.lupusursus-checkbox-group label {
+    margin: 0;
+    font-weight: normal;
+}
+
+/* Form messages */
+.lupusursus-form-message {
+    padding: 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.lupusursus-form-message--success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.lupusursus-form-message--error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* ==========================================================================
+   Campaigns Grid
+   ========================================================================== */
+.lupusursus-campaigns-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 30px;
+}
+
+.lupusursus-campaigns-grid .lupusursus-campaign {
+    margin-bottom: 0;
+}
+
+/* ==========================================================================
+   Donors List
+   ========================================================================== */
+.lupusursus-donors-list {
+    background: var(--lupusursus-white);
+    border-radius: var(--lupusursus-radius);
+    padding: 20px;
+    box-shadow: var(--lupusursus-shadow);
+}
+
+.lupusursus-donors-list h4 {
+    margin: 0 0 20px;
+    font-size: 16px;
+    color: var(--lupusursus-text);
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--lupusursus-border);
+}
+
+.lupusursus-donor-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--lupusursus-border);
+}
+
+.lupusursus-donor-item:last-child {
+    border-bottom: none;
+}
+
+.lupusursus-donor-info {
+    flex: 1;
+}
+
+.lupusursus-donor-name {
+    font-weight: 600;
+    color: var(--lupusursus-text);
+    margin-bottom: 3px;
+}
+
+.lupusursus-donor-message {
+    font-size: 13px;
+    color: var(--lupusursus-text-light);
+    font-style: italic;
+    margin-top: 5px;
+}
+
+.lupusursus-donor-amount {
+    font-weight: 700;
+    color: var(--lupusursus-success);
+    font-size: 15px;
+    white-space: nowrap;
+    margin-left: 15px;
+}
+
+.lupusursus-donor-date {
+    font-size: 12px;
+    color: var(--lupusursus-text-light);
+}
+
+.lupusursus-donors-empty {
+    text-align: center;
+    color: var(--lupusursus-text-light);
+    padding: 20px;
+}
+
+/* ==========================================================================
+   Widget Styles
+   ========================================================================== */
+.lupusursus-widget-content {
+    padding: 10px 0;
+}
+
+.lupusursus-widget-image {
+    display: block;
+    margin-bottom: 15px;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.lupusursus-widget-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.lupusursus-widget-progress .lupusursus-progress-bar-container {
+    height: 10px;
+}
+
+.lupusursus-widget-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.lupusursus-widget-collected {
+    font-weight: 700;
+    color: var(--lupusursus-text);
+}
+
+.lupusursus-widget-percentage {
+    color: var(--lupusursus-primary);
+    font-weight: 600;
+}
+
+.lupusursus-widget-goal {
+    font-size: 12px;
+    color: var(--lupusursus-text-light);
+    margin-top: 5px;
+}
+
+/* ==========================================================================
+   Success/Cancel Pages
+   ========================================================================== */
+.lupusursus-message {
+    text-align: center;
+    padding: 40px 30px;
+    background: var(--lupusursus-white);
+    border-radius: var(--lupusursus-radius);
+    box-shadow: var(--lupusursus-shadow);
+    max-width: 500px;
+    margin: 40px auto;
+}
+
+.lupusursus-message-icon {
+    font-size: 60px;
+    margin-bottom: 20px;
+}
+
+.lupusursus-message--success .lupusursus-message-icon {
+    color: var(--lupusursus-success);
+}
+
+.lupusursus-message--cancel .lupusursus-message-icon {
+    color: var(--lupusursus-text-light);
+}
+
+.lupusursus-message h2 {
+    margin: 0 0 15px;
+    font-size: 24px;
+    color: var(--lupusursus-text);
+}
+
+.lupusursus-message p {
+    color: var(--lupusursus-text-light);
+    line-height: 1.6;
+    margin: 0 0 25px;
+}
+
+/* ==========================================================================
+   Loading States
+   ========================================================================== */
+.lupusursus-loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--lupusursus-border);
+    border-top-color: var(--lupusursus-primary);
+    border-radius: 50%;
+    animation: shelter-spin 0.8s linear infinite;
+}
+
+@keyframes shelter-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.lupusursus-donate-btn .lupusursus-loading {
+    width: 16px;
+    height: 16px;
+    border-width: 2px;
+    border-color: rgba(255, 255, 255, 0.3);
+    border-top-color: var(--lupusursus-white);
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 768px) {
+    .lupusursus-amount-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .lupusursus-campaigns-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .lupusursus-campaign-content {
+        padding: 20px;
+    }
+
+    .lupusursus-donation-form {
+        padding: 20px;
+    }
+
+    .lupusursus-donate-btn {
+        padding: 12px 25px;
+        font-size: 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .lupusursus-progress-stats {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .lupusursus-donor-item {
+        flex-direction: column;
+    }
+
+    .lupusursus-donor-amount {
+        margin-left: 0;
+        margin-top: 8px;
+    }
+}
+
+/* ==========================================================================
+   Shelter prefix aliases (for compatibility)
+   ========================================================================== */
+.shelter-campaign { background: var(--lupusursus-white); border-radius: var(--lupusursus-radius); box-shadow: var(--lupusursus-shadow); overflow: hidden; margin-bottom: 30px; }
+.shelter-campaign-image { position: relative; overflow: hidden; }
+.shelter-campaign-image img { width: 100%; height: auto; display: block; }
+.shelter-campaign-content { padding: 25px; }
+.shelter-campaign-title { margin: 0 0 10px; font-size: 22px; font-weight: 700; color: var(--lupusursus-text); line-height: 1.3; }
+.shelter-campaign-beneficiary { margin: 0 0 15px; font-size: 14px; color: var(--lupusursus-primary); font-weight: 500; }
+.shelter-campaign-description { margin: 20px 0; color: var(--lupusursus-text-light); line-height: 1.7; }
+.shelter-campaign-inactive { background: var(--lupusursus-bg); padding: 15px; border-radius: 6px; color: var(--lupusursus-text-light); text-align: center; }
+
+/* Progress bar - shelter prefix */
+.shelter-progress { margin: 20px 0; }
+.shelter-progress-amounts { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 15px; }
+.shelter-progress-collected { font-weight: 700; color: var(--lupusursus-text); }
+.shelter-progress-goal { color: var(--lupusursus-text-light); }
+.shelter-progress-bar-container { height: 12px; background: var(--lupusursus-border); border-radius: 6px; overflow: hidden; }
+.shelter-progress-bar { height: 100%; border-radius: 6px; transition: width 0.8s ease-out; }
+.shelter-progress-meta { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; }
+.shelter-progress-percentage { font-weight: 600; color: var(--lupusursus-primary); }
+.shelter-progress-donors { color: var(--lupusursus-text-light); }
+.shelter-progress-amounts--compact { margin-top: 8px; font-size: 13px; color: var(--lupusursus-text-light); }
+.shelter-progress-amounts--compact span { font-weight: 500; }
+
+/* Donate button - shelter prefix */
+.shelter-donate-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--lupusursus-primary); color: var(--lupusursus-white) !important; padding: 14px 35px; border: none; border-radius: 30px; font-size: 16px; font-weight: 600; text-decoration: none !important; text-align: center; cursor: pointer; transition: var(--lupusursus-transition); box-shadow: 0 4px 15px rgba(231, 76, 60, 0.3); }
+.shelter-donate-btn:hover { background: var(--lupusursus-primary-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4); }
+.shelter-donate-btn--primary { background: var(--lupusursus-primary); }
+.shelter-donate-btn--full { display: flex; width: 100%; }
+.shelter-donate-btn--small { padding: 10px 20px; font-size: 14px; }
+
+/* Donation form - shelter prefix */
+.shelter-donation-form { background: var(--lupusursus-white); border-radius: var(--lupusursus-radius); padding: 25px; }
+.shelter-form-section { margin-bottom: 20px; }
+.shelter-form-label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--lupusursus-text); font-size: 14px; }
+.shelter-input, .shelter-textarea { width: 100%; padding: 12px 16px; border: 2px solid var(--lupusursus-border); border-radius: 8px; font-size: 15px; transition: var(--lupusursus-transition); box-sizing: border-box; }
+.shelter-input:focus, .shelter-textarea:focus { outline: none; border-color: var(--lupusursus-primary); box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1); }
+.shelter-textarea { min-height: 80px; resize: vertical; }
+.shelter-amount-buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 12px; }
+.shelter-amount-btn { padding: 12px 8px; border: 2px solid var(--lupusursus-border); border-radius: 8px; background: var(--lupusursus-white); font-size: 15px; font-weight: 600; color: var(--lupusursus-text); cursor: pointer; transition: var(--lupusursus-transition); }
+.shelter-amount-btn:hover { border-color: var(--lupusursus-primary); color: var(--lupusursus-primary); }
+.shelter-amount-btn.active { background: var(--lupusursus-primary); border-color: var(--lupusursus-primary); color: var(--lupusursus-white); }
+.shelter-custom-amount-wrapper { margin-top: 12px; }
+.shelter-custom-amount-wrapper label { font-size: 13px; color: var(--lupusursus-text-light); margin-bottom: 6px; display: block; }
+.shelter-input-group { position: relative; }
+.shelter-input-suffix { position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--lupusursus-text-light); font-weight: 500; }
+.shelter-checkbox { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 14px; }
+.shelter-checkbox input[type="checkbox"] { width: 18px; height: 18px; accent-color: var(--lupusursus-primary); cursor: pointer; }
+.shelter-form-footer { margin-top: 20px; text-align: center; font-size: 12px; color: var(--lupusursus-text-light); }
+.shelter-secure-notice { display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 8px; }
+.shelter-payment-methods { font-size: 11px; }
+.shelter-form-error { background: #fef2f2; border: 1px solid #fecaca; color: #dc2626; padding: 12px; border-radius: 8px; font-size: 14px; margin-top: 15px; }
+.shelter-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: shelter-spin 0.8s linear infinite; }
+@keyframes shelter-spin { to { transform: rotate(360deg); } }
+.shelter-btn-loading { display: flex; align-items: center; gap: 8px; }
+
+/* Campaigns grid - shelter prefix */
+.shelter-campaigns-grid { display: grid; gap: 20px; }
+.shelter-campaigns-grid--2-cols { grid-template-columns: repeat(2, 1fr); }
+.shelter-campaigns-grid--3-cols { grid-template-columns: repeat(3, 1fr); }
+.shelter-campaigns-grid--4-cols { grid-template-columns: repeat(4, 1fr); }
+
+/* Campaign card */
+.shelter-campaign-card { background: var(--lupusursus-white); border-radius: var(--lupusursus-radius); overflow: hidden; box-shadow: var(--lupusursus-shadow); cursor: pointer; transition: var(--lupusursus-transition); display: flex; flex-direction: column; }
+.shelter-campaign-card:hover { transform: translateY(-4px); box-shadow: 0 8px 30px rgba(0,0,0,0.12); }
+.shelter-campaign-card-image { overflow: hidden; }
+.shelter-campaign-card-image img { width: 100%; height: auto; display: block; transition: transform 0.3s; }
+.shelter-campaign-card:hover .shelter-campaign-card-image img { transform: scale(1.05); }
+.shelter-campaign-card-content { padding: 20px; flex: 1; display: flex; flex-direction: column; }
+.shelter-campaign-card-title { margin: 0 0 8px; font-size: 18px; font-weight: 700; color: var(--lupusursus-text); }
+.shelter-campaign-card-beneficiary { font-size: 13px; color: var(--lupusursus-primary); margin: 0 0 10px; }
+.shelter-campaign-card-excerpt { font-size: 13px; color: var(--lupusursus-text-light); line-height: 1.5; margin: 0 0 12px; flex: 1; }
+.shelter-campaign-card .shelter-progress { margin: 0 0 16px; }
+.shelter-campaign-card .shelter-donate-btn { margin-top: auto; }
+
+/* Donors list - shelter prefix */
+.shelter-donors-list { margin-top: 24px; border-top: 1px solid var(--lupusursus-border); padding-top: 24px; }
+.shelter-donors-title { font-size: 14px; font-weight: 600; margin: 0 0 16px; color: var(--lupusursus-text); }
+.shelter-donors { list-style: none; margin: 0; padding: 0; }
+.shelter-donor { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--lupusursus-bg); }
+.shelter-donor:last-child { border-bottom: none; }
+.shelter-donor-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(231,76,60,0.1); color: var(--lupusursus-primary); display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+.shelter-donor-info { flex: 1; min-width: 0; }
+.shelter-donor-name { font-weight: 600; font-size: 14px; color: var(--lupusursus-text); }
+.shelter-donor-amount { font-weight: 700; color: var(--lupusursus-primary); font-size: 14px; }
+.shelter-donor-date { font-size: 11px; color: var(--lupusursus-text-light); display: block; margin-top: 4px; }
+.shelter-no-donors { color: var(--lupusursus-text-light); font-size: 13px; }
+
+/* ==========================================================================
+   Inline Images in Description
+   ========================================================================== */
+.shelter-inline-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin: 16px 0;
+    display: block;
+    cursor: pointer;
+    transition: var(--lupusursus-transition);
+}
+
+.shelter-inline-image:hover {
+    opacity: 0.9;
+}
+
+/* ==========================================================================
+   Gallery
+   ========================================================================== */
+.shelter-gallery {
+    margin-top: 24px;
+    padding-top: 24px;
+    border-top: 1px solid var(--lupusursus-border);
+}
+
+.shelter-gallery-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: var(--lupusursus-text);
+}
+
+.shelter-gallery-images {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.shelter-gallery-item {
+    display: block;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: var(--lupusursus-transition);
+}
+
+.shelter-gallery-item:hover {
+    opacity: 0.9;
+}
+
+.shelter-gallery-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* ==========================================================================
+   Modal
+   ========================================================================== */
+body.shelter-modal-open {
+    overflow: hidden;
+}
+
+.shelter-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.shelter-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.shelter-modal-container {
+    position: relative;
+    background: var(--lupusursus-white);
+    border-radius: calc(var(--lupusursus-radius) + 8px);
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: auto;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+}
+
+.shelter-modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    font-size: 24px;
+    line-height: 1;
+    color: var(--lupusursus-text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--lupusursus-transition);
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.shelter-modal-close:hover {
+    background: var(--lupusursus-white);
+    color: var(--lupusursus-text);
+}
+
+.shelter-modal-content {
+    /* Content styles */
+}
+
+.shelter-modal-image {
+    background: var(--lupusursus-bg);
+}
+
+.shelter-modal-image img {
+    width: 100%;
+    height: auto;
+    max-height: 50vh;
+    object-fit: contain;
+    display: block;
+}
+
+.shelter-modal-body {
+    padding: 24px;
+}
+
+.shelter-modal-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: var(--lupusursus-text);
+}
+
+.shelter-modal-beneficiary {
+    font-size: 14px;
+    color: var(--lupusursus-primary);
+    font-weight: 500;
+    margin: 0 0 16px;
+}
+
+.shelter-modal-description {
+    margin: 24px 0;
+}
+
+.shelter-modal-description h4 {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 12px;
+    color: var(--lupusursus-text);
+}
+
+.shelter-modal-description p {
+    font-size: 14px;
+    color: var(--lupusursus-text-light);
+    line-height: 1.7;
+}
+
+.shelter-modal-campaign .shelter-progress {
+    margin-bottom: 20px;
+    padding: 16px;
+    background: var(--lupusursus-bg);
+    border-radius: 12px;
+}
+
+/* Donate modal specific */
+.shelter-donate-modal .shelter-modal-container {
+    max-width: 500px;
+}
+
+.shelter-donate-modal .shelter-modal-content {
+    padding: 24px;
+}
+
+.shelter-donate-modal h3 {
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 4px;
+    color: var(--lupusursus-text);
+}
+
+/* ==========================================================================
+   Responsive - Modal & Gallery
+   ========================================================================== */
+@media (max-width: 768px) {
+    .shelter-campaigns-grid--2-cols,
+    .shelter-campaigns-grid--3-cols,
+    .shelter-campaigns-grid--4-cols {
+        grid-template-columns: 1fr;
+    }
+
+    .shelter-modal {
+        padding: 10px;
+    }
+
+    .shelter-modal-container {
+        max-height: 95vh;
+    }
+
+    .shelter-modal-body {
+        padding: 20px;
+    }
+
+    .shelter-amount-buttons {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 480px) {
+    .shelter-modal-title {
+        font-size: 18px;
+    }
+
+    .shelter-donate-btn {
+        padding: 12px 20px;
+        font-size: 14px;
+    }
+}

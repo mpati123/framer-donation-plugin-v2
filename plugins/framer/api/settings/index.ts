@@ -51,7 +51,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 }
 
-async function handleGet(req: VercelRequest, res: VercelResponse) {
+async function handleGet(_req: VercelRequest, res: VercelResponse) {
     const { data, error } = await supabase
         .from("settings")
         .select("*")

@@ -1,11 +1,17 @@
 {
   "rewrites": [
     { "source": "/admin", "destination": "/admin/index.html" },
-    { "source": "/admin/", "destination": "/admin/index.html" }
+    { "source": "/admin/", "destination": "/admin/index.html" },
+    { "source": "/api/campaigns/:path*", "destination": "/plugins/framer/api/campaigns/:path*" },
+    { "source": "/api/checkout/:path*", "destination": "/plugins/framer/api/checkout/:path*" },
+    { "source": "/api/donations/:path*", "destination": "/plugins/framer/api/donations/:path*" },
+    { "source": "/api/settings/:path*", "destination": "/plugins/framer/api/settings/:path*" },
+    { "source": "/api/upload/:path*", "destination": "/plugins/framer/api/upload/:path*" },
+    { "source": "/api/webhook", "destination": "/plugins/framer/api/webhook/index.ts" }
   ],
   "functions": {
-    "api/webhook/index.ts": {
-      "includeFiles": "api/webhook/**"
+    "plugins/framer/api/webhook/index.ts": {
+      "includeFiles": "plugins/framer/api/webhook/**"
     },
     "api/license/webhook.ts": {
       "includeFiles": "api/license/**"

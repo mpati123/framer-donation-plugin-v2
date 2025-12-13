@@ -1,0 +1,513 @@
+/**
+ * LupusUrsus Donations - Admin Styles
+ *
+ * @package LupusUrsus_Donations
+ */
+
+/* ==========================================================================
+   Settings Page
+   ========================================================================== */
+.lupusursus-donations-settings {
+    max-width: 900px;
+    margin-top: 20px;
+}
+
+.lupusursus-donations-settings h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 23px;
+    font-weight: 400;
+    margin: 0 0 20px;
+    padding: 0;
+}
+
+.lupusursus-donations-settings h2 .dashicons {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+}
+
+/* Cards */
+.lupusursus-card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+.lupusursus-card-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #c3c4c7;
+    background: #f6f7f7;
+}
+
+.lupusursus-card-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.lupusursus-card-header h3 .dashicons {
+    color: #2271b1;
+}
+
+.lupusursus-card-body {
+    padding: 20px;
+}
+
+/* Form Table */
+.lupusursus-donations-settings .form-table {
+    margin: 0;
+}
+
+.lupusursus-donations-settings .form-table th {
+    width: 200px;
+    padding: 15px 10px 15px 0;
+    vertical-align: top;
+}
+
+.lupusursus-donations-settings .form-table td {
+    padding: 15px 10px;
+    vertical-align: top;
+}
+
+.lupusursus-donations-settings .form-table input[type="text"],
+.lupusursus-donations-settings .form-table input[type="number"],
+.lupusursus-donations-settings .form-table input[type="password"],
+.lupusursus-donations-settings .form-table select {
+    width: 100%;
+    max-width: 400px;
+}
+
+.lupusursus-donations-settings .form-table .description {
+    margin-top: 8px;
+    color: #646970;
+    font-style: italic;
+}
+
+/* Mode Toggle */
+.lupusursus-mode-toggle {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.lupusursus-mode-toggle label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border: 2px solid #c3c4c7;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.lupusursus-mode-toggle label:hover {
+    border-color: #2271b1;
+}
+
+.lupusursus-mode-toggle input:checked + label,
+.lupusursus-mode-toggle label.active {
+    border-color: #2271b1;
+    background: #f0f6fc;
+}
+
+.lupusursus-mode-toggle .mode-test {
+    color: #dba617;
+}
+
+.lupusursus-mode-toggle .mode-live {
+    color: #00a32a;
+}
+
+/* Webhook URL */
+.lupusursus-webhook-url {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 600px;
+}
+
+.lupusursus-webhook-url input {
+    flex: 1;
+    font-family: monospace;
+    font-size: 12px;
+    background: #f6f7f7;
+}
+
+.lupusursus-webhook-url .button {
+    flex-shrink: 0;
+}
+
+/* Info Box */
+.lupusursus-info-box {
+    background: #f0f6fc;
+    border-left: 4px solid #2271b1;
+    padding: 12px 15px;
+    margin: 15px 0;
+}
+
+.lupusursus-info-box p {
+    margin: 0;
+}
+
+.lupusursus-info-box .dashicons {
+    color: #2271b1;
+    margin-right: 5px;
+}
+
+/* Warning Box */
+.lupusursus-warning-box {
+    background: #fcf9e8;
+    border-left: 4px solid #dba617;
+    padding: 12px 15px;
+    margin: 15px 0;
+}
+
+.lupusursus-warning-box .dashicons {
+    color: #dba617;
+}
+
+/* Success Box */
+.lupusursus-success-box {
+    background: #edfaef;
+    border-left: 4px solid #00a32a;
+    padding: 12px 15px;
+    margin: 15px 0;
+}
+
+.lupusursus-success-box .dashicons {
+    color: #00a32a;
+}
+
+/* Error Box */
+.lupusursus-error-box {
+    background: #fcf0f1;
+    border-left: 4px solid #d63638;
+    padding: 12px 15px;
+    margin: 15px 0;
+}
+
+.lupusursus-error-box .dashicons {
+    color: #d63638;
+}
+
+/* ==========================================================================
+   Shortcodes Documentation
+   ========================================================================== */
+.lupusursus-shortcodes-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.lupusursus-shortcode-item {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.lupusursus-shortcode-item:last-child {
+    border-bottom: none;
+}
+
+.lupusursus-shortcode-item code {
+    display: inline-block;
+    background: #2271b1;
+    color: #fff;
+    padding: 4px 10px;
+    border-radius: 3px;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.lupusursus-shortcode-item p {
+    margin: 0;
+    color: #646970;
+    font-size: 13px;
+}
+
+/* ==========================================================================
+   Campaign Meta Box
+   ========================================================================== */
+.lupusursus-meta-box {
+    padding: 10px 0;
+}
+
+.lupusursus-meta-row {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    gap: 15px;
+}
+
+.lupusursus-meta-row:last-child {
+    margin-bottom: 0;
+}
+
+.lupusursus-meta-row label {
+    flex: 0 0 150px;
+    font-weight: 600;
+    padding-top: 5px;
+}
+
+.lupusursus-meta-row .lupusursus-meta-field {
+    flex: 1;
+}
+
+.lupusursus-meta-row input[type="text"],
+.lupusursus-meta-row input[type="number"],
+.lupusursus-meta-row input[type="date"],
+.lupusursus-meta-row select,
+.lupusursus-meta-row textarea {
+    width: 100%;
+    max-width: 300px;
+}
+
+.lupusursus-meta-row textarea {
+    max-width: 100%;
+    min-height: 80px;
+}
+
+.lupusursus-meta-row .description {
+    display: block;
+    margin-top: 5px;
+    color: #646970;
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Color Picker */
+.lupusursus-color-picker-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.lupusursus-color-picker-wrapper input[type="color"] {
+    width: 50px;
+    height: 30px;
+    padding: 0;
+    border: 1px solid #c3c4c7;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.lupusursus-color-picker-wrapper input[type="text"] {
+    width: 100px !important;
+    font-family: monospace;
+}
+
+/* ==========================================================================
+   Donation Meta Box
+   ========================================================================== */
+.lupusursus-donation-details {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+}
+
+.lupusursus-donation-detail {
+    display: flex;
+    flex-direction: column;
+}
+
+.lupusursus-donation-detail .label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: #646970;
+    margin-bottom: 3px;
+}
+
+.lupusursus-donation-detail .value {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.lupusursus-donation-detail .value.amount {
+    color: #00a32a;
+    font-size: 18px;
+}
+
+.lupusursus-donation-detail .value.status-completed {
+    color: #00a32a;
+}
+
+.lupusursus-donation-detail .value.status-pending {
+    color: #dba617;
+}
+
+.lupusursus-donation-detail .value.status-failed {
+    color: #d63638;
+}
+
+/* ==========================================================================
+   Admin Columns
+   ========================================================================== */
+.column-lupusursus_progress {
+    width: 200px;
+}
+
+.column-lupusursus_collected,
+.column-lupusursus_goal {
+    width: 100px;
+}
+
+.column-lupusursus_status {
+    width: 80px;
+}
+
+.lupusursus-admin-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.lupusursus-admin-progress-bar {
+    height: 8px;
+    background: #f0f0f1;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.lupusursus-admin-progress-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 4px;
+}
+
+.lupusursus-admin-progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #646970;
+}
+
+/* Status Badges */
+.lupusursus-status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.lupusursus-status-badge--active {
+    background: #edfaef;
+    color: #00a32a;
+}
+
+.lupusursus-status-badge--inactive {
+    background: #f0f0f1;
+    color: #646970;
+}
+
+.lupusursus-status-badge--completed {
+    background: #edfaef;
+    color: #00a32a;
+}
+
+.lupusursus-status-badge--pending {
+    background: #fcf9e8;
+    color: #996800;
+}
+
+.lupusursus-status-badge--failed {
+    background: #fcf0f1;
+    color: #d63638;
+}
+
+.lupusursus-status-badge--archived {
+    background: #fcf9e8;
+    color: #996800;
+}
+
+/* Shelter status badges (legacy) */
+.shelter-status-badge {
+    display: inline-block;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.shelter-status-badge--active {
+    background: #edfaef;
+    color: #00a32a;
+}
+
+.shelter-status-badge--inactive {
+    background: #f0f0f1;
+    color: #646970;
+}
+
+.shelter-status-badge--archived {
+    background: #fcf9e8;
+    color: #996800;
+}
+
+/* ==========================================================================
+   Dashboard Widget
+   ========================================================================== */
+.lupusursus-dashboard-widget .lupusursus-stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f1;
+}
+
+.lupusursus-dashboard-widget .lupusursus-stat-row:last-child {
+    border-bottom: none;
+}
+
+.lupusursus-dashboard-widget .lupusursus-stat-label {
+    color: #646970;
+}
+
+.lupusursus-dashboard-widget .lupusursus-stat-value {
+    font-weight: 600;
+}
+
+.lupusursus-dashboard-widget .lupusursus-stat-value.positive {
+    color: #00a32a;
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media screen and (max-width: 782px) {
+    .lupusursus-donations-settings .form-table th {
+        width: auto;
+        display: block;
+        padding-bottom: 5px;
+    }
+
+    .lupusursus-donations-settings .form-table td {
+        display: block;
+        padding-top: 0;
+    }
+
+    .lupusursus-meta-row {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .lupusursus-meta-row label {
+        flex: none;
+    }
+
+    .lupusursus-donation-details {
+        grid-template-columns: 1fr;
+    }
+
+    .lupusursus-mode-toggle {
+        flex-direction: column;
+    }
+}

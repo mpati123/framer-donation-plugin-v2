@@ -1,0 +1,596 @@
+# Copyright (C) 2024 LupusUrsus Donations
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: LupusUrsus Donations 1.0.0\n"
+"Report-Msgid-Bugs-To: https://github.com/your-repo/lupusursus-donations/issues\n"
+"POT-Creation-Date: 2024-01-01 00:00:00+00:00\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2024-01-01 00:00:00+00:00\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: pl_PL\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
+
+#: lupusursus-donations.php
+msgid "LupusUrsus Donations"
+msgstr ""
+
+#: includes/class-campaign-post-type.php
+msgid "Zbiórki"
+msgstr ""
+
+msgid "Zbiórka"
+msgstr ""
+
+msgid "Dodaj nową"
+msgstr ""
+
+msgid "Dodaj nową zbiórkę"
+msgstr ""
+
+msgid "Edytuj zbiórkę"
+msgstr ""
+
+msgid "Nowa zbiórka"
+msgstr ""
+
+msgid "Zobacz zbiórkę"
+msgstr ""
+
+msgid "Szukaj zbiórek"
+msgstr ""
+
+msgid "Nie znaleziono zbiórek"
+msgstr ""
+
+msgid "Nie znaleziono w koszu"
+msgstr ""
+
+msgid "Wszystkie zbiórki"
+msgstr ""
+
+msgid "Archiwum zbiórek"
+msgstr ""
+
+msgid "Zdjęcie zbiórki"
+msgstr ""
+
+msgid "Ustaw zdjęcie"
+msgstr ""
+
+msgid "Usuń zdjęcie"
+msgstr ""
+
+msgid "Szczegóły zbiórki"
+msgstr ""
+
+msgid "Postęp zbiórki"
+msgstr ""
+
+msgid "Shortcode"
+msgstr ""
+
+msgid "Kwota docelowa (zł)"
+msgstr ""
+
+msgid "Ile chcesz zebrać?"
+msgstr ""
+
+msgid "Zebrana kwota (zł)"
+msgstr ""
+
+msgid "Aktualizowane automatycznie po każdej wpłacie."
+msgstr ""
+
+msgid "Data zakończenia"
+msgstr ""
+
+msgid "Opcjonalne. Zostaw puste dla zbiórki bez limitu czasu."
+msgstr ""
+
+msgid "Beneficjent"
+msgstr ""
+
+msgid "Np. imię zwierzęcia lub nazwa akcji."
+msgstr ""
+
+msgid "Status"
+msgstr ""
+
+msgid "Zbiórka aktywna"
+msgstr ""
+
+msgid "Odznacz aby zatrzymać przyjmowanie wpłat."
+msgstr ""
+
+msgid "Pokaż darczyńców"
+msgstr ""
+
+msgid "Wyświetlaj listę darczyńców"
+msgstr ""
+
+msgid "Styl paska postępu"
+msgstr ""
+
+msgid "Domyślny"
+msgstr ""
+
+msgid "Zaokrąglony"
+msgstr ""
+
+msgid "W paski"
+msgstr ""
+
+msgid "Animowany"
+msgstr ""
+
+msgid "Gradient"
+msgstr ""
+
+msgid "Kolor paska"
+msgstr ""
+
+msgid "zebrano"
+msgstr ""
+
+msgid "cel"
+msgstr ""
+
+msgid "wpłat"
+msgstr ""
+
+msgid "Opublikuj zbiórkę aby uzyskać shortcode."
+msgstr ""
+
+msgid "Pełna zbiórka:"
+msgstr ""
+
+msgid "Tylko pasek postępu:"
+msgstr ""
+
+msgid "Tylko przycisk:"
+msgstr ""
+
+msgid "Aktywna"
+msgstr ""
+
+msgid "Nieaktywna"
+msgstr ""
+
+msgid "Postęp"
+msgstr ""
+
+msgid "Cel"
+msgstr ""
+
+#: includes/class-donation-post-type.php
+msgid "Wpłaty"
+msgstr ""
+
+msgid "Wpłata"
+msgstr ""
+
+msgid "Dodaj nową wpłatę"
+msgstr ""
+
+msgid "Edytuj wpłatę"
+msgstr ""
+
+msgid "Zobacz wpłatę"
+msgstr ""
+
+msgid "Szukaj wpłat"
+msgstr ""
+
+msgid "Nie znaleziono wpłat"
+msgstr ""
+
+msgid "Wszystkie wpłaty"
+msgstr ""
+
+msgid "Kwota"
+msgstr ""
+
+msgid "Darczyńca"
+msgstr ""
+
+msgid "Anonimowy"
+msgstr ""
+
+#: includes/class-stripe-handler.php
+msgid "Stripe nie jest skonfigurowany."
+msgstr ""
+
+msgid "Biblioteka Stripe nie jest zainstalowana. Uruchom: composer require stripe/stripe-php"
+msgstr ""
+
+msgid "Nie znaleziono zbiórki."
+msgstr ""
+
+msgid "Ta zbiórka nie jest już aktywna."
+msgstr ""
+
+msgid "Minimalna kwota wpłaty to %s zł."
+msgstr ""
+
+msgid "Darowizna: %s"
+msgstr ""
+
+msgid "Dla: %s"
+msgstr ""
+
+msgid "Nowa wpłata: %s zł na \"%s\""
+msgstr ""
+
+msgid "Otrzymano nową wpłatę!\n\nZbiórka: %s\nKwota: %s zł\nDarczyńca: %s\n\nZobacz wpłatę: %s"
+msgstr ""
+
+msgid "Brak klucza Secret Key dla Stripe."
+msgstr ""
+
+msgid "Brak klucza Publishable Key dla Stripe."
+msgstr ""
+
+msgid "Klucz Secret Key powinien zaczynać się od \"%s\" dla trybu %s."
+msgstr ""
+
+#: includes/class-shortcodes.php
+msgid "Nie podano ID zbiórki."
+msgstr ""
+
+msgid "Dla: %s"
+msgstr ""
+
+msgid "z %s zł"
+msgstr ""
+
+msgid "%d darczyńca"
+msgid_plural "%d darczyńców"
+msgstr[0] ""
+msgstr[1] ""
+msgstr[2] ""
+
+msgid "Zbiórka zakończona"
+msgstr ""
+
+msgid "Pozostało: %d dni"
+msgstr ""
+
+msgid "Ta zbiórka nie przyjmuje już wpłat."
+msgstr ""
+
+msgid "Wesprzyj"
+msgstr ""
+
+msgid "Brak zbiórek do wyświetlenia."
+msgstr ""
+
+msgid "Wybierz kwotę:"
+msgstr ""
+
+msgid "Lub wpisz własną kwotę:"
+msgstr ""
+
+msgid "Twoje imię (opcjonalnie):"
+msgstr ""
+
+msgid "Jan Kowalski"
+msgstr ""
+
+msgid "Twój email (opcjonalnie):"
+msgstr ""
+
+msgid "jan@example.com"
+msgstr ""
+
+msgid "Wiadomość (opcjonalnie):"
+msgstr ""
+
+msgid "Twoja wiadomość do organizatorów..."
+msgstr ""
+
+msgid "Chcę pozostać anonimowy/a"
+msgstr ""
+
+msgid "Przejdź do płatności"
+msgstr ""
+
+msgid "Przekierowuję..."
+msgstr ""
+
+msgid "Bezpieczna płatność przez Stripe"
+msgstr ""
+
+msgid "Akceptujemy: Visa, Mastercard, BLIK, Przelewy24"
+msgstr ""
+
+msgid "Bądź pierwszym darczyńcą!"
+msgstr ""
+
+msgid "Ostatni darczyńcy"
+msgstr ""
+
+msgid "temu"
+msgstr ""
+
+#: includes/class-ajax-handler.php
+msgid "Błąd weryfikacji. Odśwież stronę i spróbuj ponownie."
+msgstr ""
+
+msgid "Nie wybrano zbiórki."
+msgstr ""
+
+msgid "Nie podano ID zbiórki."
+msgstr ""
+
+msgid "Brak ID sesji."
+msgstr ""
+
+#: includes/class-campaign-widget.php
+msgid "Zbiórka - LupusUrsus Donations"
+msgstr ""
+
+msgid "Wyświetla pasek postępu zbiórki z przyciskiem wpłaty."
+msgstr ""
+
+msgid "Tytuł (opcjonalnie):"
+msgstr ""
+
+msgid "Zostaw puste aby użyć tytułu zbiórki."
+msgstr ""
+
+msgid "Wybierz zbiórkę:"
+msgstr ""
+
+msgid "-- Wybierz --"
+msgstr ""
+
+msgid "Pokaż zdjęcie"
+msgstr ""
+
+msgid "Pokaż przycisk \"Wesprzyj\""
+msgstr ""
+
+msgid "Cel: %s zł"
+msgstr ""
+
+#: admin/class-admin-settings.php
+msgid "Ustawienia"
+msgstr ""
+
+msgid "Konfiguracja Stripe"
+msgstr ""
+
+msgid "Skonfiguruj integrację z Stripe. Klucze znajdziesz w panelu Stripe w sekcji Developers > API Keys."
+msgstr ""
+
+msgid "Webhook URL:"
+msgstr ""
+
+msgid "Dodaj ten URL w panelu Stripe > Developers > Webhooks"
+msgstr ""
+
+msgid "Problemy z konfiguracją:"
+msgstr ""
+
+msgid "Konfiguracja Stripe jest poprawna!"
+msgstr ""
+
+msgid "Ustawienia ogólne"
+msgstr ""
+
+msgid "Ogólne ustawienia wtyczki."
+msgstr ""
+
+msgid "Tryb Stripe"
+msgstr ""
+
+msgid "Test (do testowania)"
+msgstr ""
+
+msgid "Live (produkcyjny)"
+msgstr ""
+
+msgid "Tryb testowy - wpłaty nie będą prawdziwe."
+msgstr ""
+
+msgid "Tryb produkcyjny - prawdziwe wpłaty."
+msgstr ""
+
+msgid "Test Publishable Key"
+msgstr ""
+
+msgid "Test Secret Key"
+msgstr ""
+
+msgid "Live Publishable Key"
+msgstr ""
+
+msgid "Live Secret Key"
+msgstr ""
+
+msgid "Webhook Secret"
+msgstr ""
+
+msgid "Waluta"
+msgstr ""
+
+msgid "Polski złoty (PLN)"
+msgstr ""
+
+msgid "Euro (EUR)"
+msgstr ""
+
+msgid "Dolar amerykański (USD)"
+msgstr ""
+
+msgid "Funt brytyjski (GBP)"
+msgstr ""
+
+msgid "Korona czeska (CZK)"
+msgstr ""
+
+msgid "BLIK i Przelewy24 dostępne tylko dla PLN."
+msgstr ""
+
+msgid "Symbol waluty"
+msgstr ""
+
+msgid "Minimalna kwota wpłaty"
+msgstr ""
+
+msgid "Pokaż"
+msgstr ""
+
+msgid "Ukryj"
+msgstr ""
+
+msgid "Ustawienia zostały zapisane."
+msgstr ""
+
+msgid "Wtyczka do zbiórek pieniędzy z paskiem postępu i integracją Stripe."
+msgstr ""
+
+msgid "Shortcodes"
+msgstr ""
+
+msgid "Pomoc"
+msgstr ""
+
+msgid "Zapisz ustawienia"
+msgstr ""
+
+msgid "Dostępne shortcodes"
+msgstr ""
+
+msgid "Opis"
+msgstr ""
+
+msgid "Parametry"
+msgstr ""
+
+msgid "Pełna zbiórka z obrazem, paskiem postępu i formularzem wpłaty."
+msgstr ""
+
+msgid "Tylko pasek postępu."
+msgstr ""
+
+msgid "Tylko przycisk wpłaty."
+msgstr ""
+
+msgid "Tylko formularz wpłaty."
+msgstr ""
+
+msgid "Lista zbiórek w siatce."
+msgstr ""
+
+msgid "Lista ostatnich darczyńców."
+msgstr ""
+
+msgid "Jak zacząć?"
+msgstr ""
+
+msgid "Utwórz konto w Stripe i pobierz klucze API."
+msgstr ""
+
+msgid "Wklej klucze w zakładce Ustawienia powyżej."
+msgstr ""
+
+msgid "Utwórz zbiórkę w menu Zbiórki > Dodaj nową."
+msgstr ""
+
+msgid "Wstaw shortcode na stronę lub użyj widżetu."
+msgstr ""
+
+msgid "Skonfiguruj webhook w panelu Stripe."
+msgstr ""
+
+msgid "Konfiguracja Webhook"
+msgstr ""
+
+msgid "Aby automatycznie aktualizować stan zbiórki po wpłacie:"
+msgstr ""
+
+msgid "Zaloguj się do panelu Stripe > Developers > Webhooks"
+msgstr ""
+
+msgid "Kliknij \"Add endpoint\""
+msgstr ""
+
+msgid "Wklej URL: %s"
+msgstr ""
+
+msgid "Wybierz zdarzenia: checkout.session.completed, payment_intent.succeeded, payment_intent.payment_failed"
+msgstr ""
+
+msgid "Skopiuj \"Signing secret\" i wklej w ustawieniach powyżej"
+msgstr ""
+
+msgid "Wsparcie"
+msgstr ""
+
+msgid "Masz pytania? Napisz do nas:"
+msgstr ""
+
+#: Main plugin file
+msgid "Ładowanie..."
+msgstr ""
+
+msgid "Przetwarzanie..."
+msgstr ""
+
+msgid "Wystąpił błąd. Spróbuj ponownie."
+msgstr ""
+
+msgid "Dziękujemy za wsparcie!"
+msgstr ""
+
+msgid "Cel osiągnięty!"
+msgstr ""
+
+msgid "Skopiowano!"
+msgstr ""
+
+msgid "Testowanie..."
+msgstr ""
+
+msgid "Przeliczanie..."
+msgstr ""
+
+msgid "Sukces!"
+msgstr ""
+
+msgid "Błąd"
+msgstr ""
+
+#: templates/success.php
+msgid "Dziękujemy za wpłatę!"
+msgstr ""
+
+msgid "Twoja wpłata została pomyślnie zrealizowana. Potwierdzenie zostanie wysłane na podany adres email."
+msgstr ""
+
+msgid "Właśnie wsparłeś zbiórkę \"%s\". Każda złotówka się liczy!"
+msgstr ""
+
+msgid "Wróć do zbiórki"
+msgstr ""
+
+msgid "Podziel się zbiórką z innymi i pomóż zebrać jeszcze więcej!"
+msgstr ""
+
+#: templates/cancel.php
+msgid "Płatność anulowana"
+msgstr ""
+
+msgid "Twoja płatność została anulowana. Żadne środki nie zostały pobrane."
+msgstr ""
+
+msgid "Jeśli chcesz, możesz spróbować ponownie:"
+msgstr ""
+
+msgid "Spróbuj ponownie"
+msgstr ""

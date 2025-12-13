@@ -1,14 +1,19 @@
 {
-  "name": "donation-framer-plugin-v2",
+  "name": "donations-saas",
   "private": true,
   "version": "1.0.1",
+  "description": "SaaS platform for donation plugins - Framer, WordPress and more",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "cd plugins/framer && vite",
+    "dev:framer": "cd plugins/framer && vite",
+    "dev:dashboard": "cd dashboard && npm run dev",
+    "build": "cd plugins/framer && vite build",
+    "build:framer": "cd plugins/framer && vite build",
+    "build:dashboard": "cd dashboard && npm run build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview",
-    "pack": "npx framer-plugin-tools@latest pack"
+    "preview": "cd plugins/framer && vite preview",
+    "pack": "cd plugins/framer && npx framer-plugin-tools@latest pack"
   },
   "dependencies": {
     "framer-plugin": "^3",
@@ -18,7 +23,7 @@
     "@supabase/supabase-js": "^2.39.0",
     "@vercel/node": "^3.0.0",
     "micro": "^10.0.1",
-    "stripe": "^14.10.0"
+    "stripe": "^14.25.0"
   },
   "devDependencies": {
     "@eslint/js": "^9",

@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(process.env.LICENSE_STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-11-20.acacia",
+  apiVersion: "2023-10-16",
 });
 
 const supabase = createClient(
@@ -178,12 +178,15 @@ export default async function handler(
               .select()
               .single();
 
-            if (error) {
+            if (error || !newOrg) {
               console.error("Failed to create organization:", error);
               break;
             }
             org = newOrg;
           }
+
+          // At this point org is guaranteed to exist
+          const organizationId = org.id;
 
           // Get subscription details
           const subscription = await stripe.subscriptions.retrieve(
@@ -209,7 +212,7 @@ export default async function handler(
           const { error: licenseError } = await supabase
             .from("licenses")
             .insert({
-              organization_id: org.id,
+              organization_id: organizationId,
               license_key: licenseKey,
               stripe_customer_id: session.customer as string,
               stripe_subscription_id: subscription.id,

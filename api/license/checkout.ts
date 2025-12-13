@@ -3,7 +3,7 @@ import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(process.env.LICENSE_STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-11-20.acacia",
+  apiVersion: "2023-10-16",
 });
 
 const supabase = createClient(
@@ -85,7 +85,6 @@ export default async function handler(
 
     // Validate promo code if provided
     let stripePromoCodeId: string | undefined;
-    let discountInfo: { type: string; value: number | null } | undefined;
 
     if (promoCode) {
       const { data: promo } = await supabase
@@ -115,11 +114,6 @@ export default async function handler(
           error: `This promo code only applies to ${promo.applies_to} plans`,
         });
       }
-
-      discountInfo = {
-        type: promo.discount_type,
-        value: promo.discount_value,
-      };
 
       // Create Stripe coupon for this promo (if not 100% free)
       if (promo.discount_type === "free") {

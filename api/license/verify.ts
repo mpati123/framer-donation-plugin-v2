@@ -43,7 +43,7 @@ export default async function handler(
   }
 
   try {
-    const { key, domain } = req.body as LicenseVerifyRequest;
+    const { key } = req.body as LicenseVerifyRequest;
 
     if (!key) {
       return res.status(400).json({
