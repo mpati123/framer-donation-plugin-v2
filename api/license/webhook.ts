@@ -15,8 +15,9 @@ const supabase = createClient(
 const webhookSecret = process.env.LICENSE_STRIPE_WEBHOOK_SECRET!;
 
 // Generate license key: DPL-XXXX-XXXX-XXXX
+// Excluded confusing chars: 0/O, 1/I/L
 function generateLicenseKey(): string {
-  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
   let result = "DPL-";
   for (let j = 0; j < 3; j++) {
     for (let i = 0; i < 4; i++) {
