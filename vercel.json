@@ -5,7 +5,7 @@
     { "source": "/admin/", "destination": "/admin/index.html" },
     { "source": "/api/webhook", "destination": "/api/donation-webhook/index.ts" },
     { "source": "/api/campaigns", "destination": "/api/campaigns/[[...path]]" },
-    { "source": "/api/campaigns/:path*", "destination": "/api/campaigns/[[...path]]" }
+    { "source": "/api/campaigns/:id", "destination": "/api/campaigns/[[...path]]?id=:id" }
   ],
   "functions": {
     "api/license/webhook.ts": {

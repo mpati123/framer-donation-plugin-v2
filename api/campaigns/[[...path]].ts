@@ -40,20 +40,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Parse path: /api/campaigns or /api/campaigns/:id
-    // Try query.path first, then parse from URL
-    let pathSegments = req.query.path as string[] | undefined
-    if (!pathSegments || pathSegments.length === 0) {
-        const url = req.url || ""
-        // Match UUID or any path segment after /campaigns/
-        const match = url.match(/\/campaigns\/([a-f0-9-]{36}|[^/?]+)/)
-        if (match) {
-            pathSegments = [match[1]]
+    // Check query.id (from rewrite), then query.path, then parse URL
+    let campaignId: string | undefined = req.query.id as string | undefined
+
+    if (!campaignId) {
+        const pathSegments = req.query.path as string[] | undefined
+        if (pathSegments && pathSegments.length > 0) {
+            campaignId = pathSegments[0]
         }
     }
-    const campaignId = pathSegments?.[0]
 
-    // Debug log
-    console.log("URL:", req.url, "Query:", req.query, "CampaignId:", campaignId)
+    if (!campaignId) {
+        const url = req.url || ""
+        const match = url.match(/\/campaigns\/([a-f0-9-]{36}|[^/?]+)/)
+        if (match) {
+            campaignId = match[1]
+        }
+    }
 
     try {
         // If no ID - list/create campaigns
