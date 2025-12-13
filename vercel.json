@@ -3,7 +3,9 @@
   "rewrites": [
     { "source": "/admin", "destination": "/admin/index.html" },
     { "source": "/admin/", "destination": "/admin/index.html" },
-    { "source": "/api/webhook", "destination": "/api/donation-webhook/index.ts" }
+    { "source": "/api/webhook", "destination": "/api/donation-webhook/index.ts" },
+    { "source": "/api/campaigns", "destination": "/api/campaigns/[[...path]]" },
+    { "source": "/api/campaigns/:path*", "destination": "/api/campaigns/[[...path]]" }
   ],
   "functions": {
     "api/license/webhook.ts": {
