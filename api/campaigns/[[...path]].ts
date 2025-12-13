@@ -40,7 +40,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // Parse path: /api/campaigns or /api/campaigns/:id
-    const pathSegments = req.query.path as string[] | undefined
+    // Try query.path first, then parse from URL
+    let pathSegments = req.query.path as string[] | undefined
+    if (!pathSegments) {
+        const url = req.url || ""
+        const match = url.match(/\/api\/campaigns\/([^?]+)/)
+        if (match) {
+            pathSegments = [match[1]]
+        }
+    }
     const campaignId = pathSegments?.[0]
 
     try {
