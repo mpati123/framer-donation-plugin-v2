@@ -13,6 +13,17 @@ const supabase = createClient(
 
 const BASE_URL = process.env.BASE_URL || "https://yourdomain.com";
 
+interface Organization {
+  id: string;
+  stripe_account_id: string | null;
+  stripe_account_status: string | null;
+}
+
+interface LicenseWithOrg {
+  organization_id: string;
+  organizations: Organization | null;
+}
+
 export default async function handler(
   req: VercelRequest,
   res: VercelResponse
@@ -40,7 +51,7 @@ export default async function handler(
         .from("licenses")
         .select("organization_id, organizations(id, stripe_account_id)")
         .eq("license_key", (license_key as string).toUpperCase().trim())
-        .single();
+        .single() as { data: LicenseWithOrg | null };
 
       if (!license) {
         return res.status(404).json({ error: "License not found" });
@@ -114,7 +125,7 @@ export default async function handler(
         .from("licenses")
         .select("organization_id, organizations(id, stripe_account_id, stripe_account_status)")
         .eq("license_key", license_key.toUpperCase().trim())
-        .single();
+        .single() as { data: LicenseWithOrg | null };
 
       if (!license || !license.organizations) {
         return res.status(404).json({ error: "License not found" });
