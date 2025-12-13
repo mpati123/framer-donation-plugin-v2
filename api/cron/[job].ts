@@ -1,3 +1,11 @@
+/**
+ * /api/cron/[job]
+ *
+ * Unified cron handler for:
+ * - /api/cron/keepalive - Keep database alive
+ * - /api/cron/reminders - Send license expiry reminders
+ */
+
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createClient } from "@supabase/supabase-js";
 
@@ -9,6 +17,49 @@ const supabase = createClient(
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const EMAIL_FROM = process.env.EMAIL_FROM || "Donations Plugin <hello@yourdomain.com>";
 const DASHBOARD_URL = process.env.DASHBOARD_URL || "https://yourdomain.com/dashboard";
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const { job } = req.query;
+
+  switch (job) {
+    case "keepalive":
+      return handleKeepalive(res);
+    case "reminders":
+      return handleReminders(req, res);
+    default:
+      return res.status(404).json({ error: "Unknown cron job" });
+  }
+}
+
+// ==================== KEEPALIVE ====================
+
+async function handleKeepalive(res: VercelResponse) {
+  try {
+    const { count, error } = await supabase
+      .from("licenses")
+      .select("*", { count: "exact", head: true });
+
+    if (error) {
+      console.error("Keepalive query failed:", error);
+      return res.status(500).json({ success: false, error: error.message });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Database is alive",
+      licenses_count: count,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("Keepalive error:", error);
+    return res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    });
+  }
+}
+
+// ==================== REMINDERS ====================
 
 interface License {
   id: string;
@@ -33,7 +84,6 @@ async function sendReminderEmail(
     return;
   }
 
-  // Check if email was already sent
   const { data: existingLog } = await supabase
     .from("email_logs")
     .select("id")
@@ -54,10 +104,10 @@ async function sendReminderEmail(
   };
 
   const urgencyColors: Record<ReminderType, string> = {
-    reminder_7d: "#f59e0b", // amber
-    reminder_3d: "#f97316", // orange
-    reminder_2d: "#ef4444", // red
-    reminder_1d: "#dc2626", // dark red
+    reminder_7d: "#f59e0b",
+    reminder_3d: "#f97316",
+    reminder_2d: "#ef4444",
+    reminder_1d: "#dc2626",
   };
 
   const html = `
@@ -77,20 +127,11 @@ async function sendReminderEmail(
     </head>
     <body>
       <div class="container">
-        <div class="header">
-          <h1>🐾 Donations Plugin</h1>
-        </div>
-
+        <div class="header"><h1>🐾 Donations Plugin</h1></div>
         <div class="warning-box">
-          <p class="warning-title">
-            ${daysRemaining === 1 ? "Ostatni dzień!" : `Zostało ${daysRemaining} dni`}
-          </p>
-          <p style="margin: 0;">
-            Twoja licencja na Donations Plugin wygasa ${daysRemaining === 1 ? "jutro" : `za ${daysRemaining} dni`}.
-            ${daysRemaining <= 3 ? "Po wygaśnięciu Twój widget przestanie przyjmować wpłaty." : ""}
-          </p>
+          <p class="warning-title">${daysRemaining === 1 ? "Ostatni dzień!" : `Zostało ${daysRemaining} dni`}</p>
+          <p style="margin: 0;">Twoja licencja na Donations Plugin wygasa ${daysRemaining === 1 ? "jutro" : `za ${daysRemaining} dni`}. ${daysRemaining <= 3 ? "Po wygaśnięciu Twój widget przestanie przyjmować wpłaty." : ""}</p>
         </div>
-
         <p>Co się stanie po wygaśnięciu:</p>
         <ul>
           <li>Widget będzie nadal widoczny na Twojej stronie</li>
@@ -98,16 +139,8 @@ async function sendReminderEmail(
           <li>Formularz wpłat będzie <strong>nieaktywny</strong></li>
           <li>Twoja fundacja <strong>nie będzie mogła otrzymywać wpłat</strong></li>
         </ul>
-
-        <p style="text-align: center; margin: 30px 0;">
-          <a href="${DASHBOARD_URL}/settings/billing" class="btn">
-            Odnów teraz →
-          </a>
-        </p>
-
-        <div class="footer">
-          <p>Masz pytania? Napisz do nas: <a href="mailto:hello@yourdomain.com">hello@yourdomain.com</a></p>
-        </div>
+        <p style="text-align: center; margin: 30px 0;"><a href="${DASHBOARD_URL}/settings/billing" class="btn">Odnów teraz →</a></p>
+        <div class="footer"><p>Masz pytania? Napisz do nas: <a href="mailto:hello@yourdomain.com">hello@yourdomain.com</a></p></div>
       </div>
     </body>
     </html>
@@ -120,29 +153,19 @@ async function sendReminderEmail(
         Authorization: `Bearer ${RESEND_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        from: EMAIL_FROM,
-        to: email,
-        subject: subjects[reminderType],
-        html,
-      }),
+      body: JSON.stringify({ from: EMAIL_FROM, to: email, subject: subjects[reminderType], html }),
     });
 
     const data = await response.json();
-
-    // Log email
     await supabase.from("email_logs").insert({
       license_id: licenseId,
       email_type: reminderType,
       status: response.ok ? "sent" : "failed",
       resend_id: data.id,
     });
-
     console.log(`Sent ${reminderType} to ${email}`);
   } catch (error) {
     console.error(`Failed to send ${reminderType} to ${email}:`, error);
-
-    // Log failed attempt
     await supabase.from("email_logs").insert({
       license_id: licenseId,
       email_type: reminderType,
@@ -151,11 +174,7 @@ async function sendReminderEmail(
   }
 }
 
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
-  // Verify cron secret (optional but recommended)
+async function handleReminders(req: VercelRequest, res: VercelResponse) {
   const cronSecret = req.headers["authorization"];
   if (process.env.CRON_SECRET && cronSecret !== `Bearer ${process.env.CRON_SECRET}`) {
     return res.status(401).json({ error: "Unauthorized" });
@@ -163,79 +182,29 @@ export default async function handler(
 
   try {
     const now = new Date();
-    const results = {
-      reminder_7d: 0,
-      reminder_3d: 0,
-      reminder_2d: 0,
-      reminder_1d: 0,
+    const results = { reminder_7d: 0, reminder_3d: 0, reminder_2d: 0, reminder_1d: 0 };
+
+    const checkDays = [7, 3, 2, 1] as const;
+    const reminderTypes: Record<number, ReminderType> = {
+      7: "reminder_7d", 3: "reminder_3d", 2: "reminder_2d", 1: "reminder_1d"
     };
 
-    // Find licenses expiring in 7 days
-    const in7Days = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
-    const in7DaysStart = new Date(in7Days.setHours(0, 0, 0, 0));
-    const in7DaysEnd = new Date(in7Days.setHours(23, 59, 59, 999));
+    for (const days of checkDays) {
+      const targetDate = new Date(now.getTime() + days * 24 * 60 * 60 * 1000);
+      const startOfDay = new Date(targetDate.setHours(0, 0, 0, 0));
+      const endOfDay = new Date(targetDate.setHours(23, 59, 59, 999));
 
-    const { data: licenses7d } = await supabase
-      .from("licenses")
-      .select("id, license_key, current_period_end, organizations(email, name)")
-      .eq("status", "active")
-      .gte("current_period_end", in7DaysStart.toISOString())
-      .lte("current_period_end", in7DaysEnd.toISOString()) as { data: License[] | null };
+      const { data: licenses } = await supabase
+        .from("licenses")
+        .select("id, license_key, current_period_end, organizations(email, name)")
+        .eq("status", "active")
+        .gte("current_period_end", startOfDay.toISOString())
+        .lte("current_period_end", endOfDay.toISOString()) as { data: License[] | null };
 
-    for (const license of licenses7d || []) {
-      await sendReminderEmail(license.organizations.email, license.id, 7, "reminder_7d");
-      results.reminder_7d++;
-    }
-
-    // Find licenses expiring in 3 days
-    const in3Days = new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000);
-    const in3DaysStart = new Date(in3Days.setHours(0, 0, 0, 0));
-    const in3DaysEnd = new Date(in3Days.setHours(23, 59, 59, 999));
-
-    const { data: licenses3d } = await supabase
-      .from("licenses")
-      .select("id, license_key, current_period_end, organizations(email, name)")
-      .eq("status", "active")
-      .gte("current_period_end", in3DaysStart.toISOString())
-      .lte("current_period_end", in3DaysEnd.toISOString()) as { data: License[] | null };
-
-    for (const license of licenses3d || []) {
-      await sendReminderEmail(license.organizations.email, license.id, 3, "reminder_3d");
-      results.reminder_3d++;
-    }
-
-    // Find licenses expiring in 2 days
-    const in2Days = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
-    const in2DaysStart = new Date(in2Days.setHours(0, 0, 0, 0));
-    const in2DaysEnd = new Date(in2Days.setHours(23, 59, 59, 999));
-
-    const { data: licenses2d } = await supabase
-      .from("licenses")
-      .select("id, license_key, current_period_end, organizations(email, name)")
-      .eq("status", "active")
-      .gte("current_period_end", in2DaysStart.toISOString())
-      .lte("current_period_end", in2DaysEnd.toISOString()) as { data: License[] | null };
-
-    for (const license of licenses2d || []) {
-      await sendReminderEmail(license.organizations.email, license.id, 2, "reminder_2d");
-      results.reminder_2d++;
-    }
-
-    // Find licenses expiring in 1 day
-    const in1Day = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000);
-    const in1DayStart = new Date(in1Day.setHours(0, 0, 0, 0));
-    const in1DayEnd = new Date(in1Day.setHours(23, 59, 59, 999));
-
-    const { data: licenses1d } = await supabase
-      .from("licenses")
-      .select("id, license_key, current_period_end, organizations(email, name)")
-      .eq("status", "active")
-      .gte("current_period_end", in1DayStart.toISOString())
-      .lte("current_period_end", in1DayEnd.toISOString()) as { data: License[] | null };
-
-    for (const license of licenses1d || []) {
-      await sendReminderEmail(license.organizations.email, license.id, 1, "reminder_1d");
-      results.reminder_1d++;
+      for (const license of licenses || []) {
+        await sendReminderEmail(license.organizations.email, license.id, days, reminderTypes[days]);
+        results[reminderTypes[days]]++;
+      }
     }
 
     return res.status(200).json({
