@@ -6,6 +6,19 @@
   "functions": {
     "api/webhook/index.ts": {
       "includeFiles": "api/webhook/**"
+    },
+    "api/license/webhook.ts": {
+      "includeFiles": "api/license/**"
     }
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/reminders",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/keepalive",
+      "schedule": "0 12 * * *"
+    }
+  ]
 }

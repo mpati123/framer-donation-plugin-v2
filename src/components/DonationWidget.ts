@@ -32,14 +32,22 @@ interface Settings {
 }
 
 // Plugin version - must match api/version/index.ts
-const COMPONENT_VERSION = "1.0.0"
+const COMPONENT_VERSION = "1.0.1"
 
 interface VersionInfo {
     version: string
     changelog: string
 }
 
+interface LicenseStatus {
+    valid: boolean
+    status: "active" | "trial" | "expired" | "locked" | "not_found"
+    daysRemaining?: number
+    message?: string
+}
+
 interface Props {
+    licenseKey?: string
     campaignId?: string
     apiUrl?: string
     // Visibility toggles
@@ -103,6 +111,47 @@ function CloseIcon({ size = 24 }: { size?: number }) {
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
+    )
+}
+
+function LicenseExpiredBanner({ daysRemaining, onRenew }: { daysRemaining?: number; onRenew: () => void }) {
+    const isExpired = !daysRemaining || daysRemaining <= 0
+
+    return (
+        <div style={{
+            background: isExpired ? "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)" : "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+            color: "#fff",
+            padding: "12px 16px",
+            borderRadius: 8,
+            marginBottom: 16,
+            fontSize: 13,
+            boxShadow: isExpired ? "0 2px 8px rgba(220, 38, 38, 0.3)" : "0 2px 8px rgba(245, 158, 11, 0.3)",
+        }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                {isExpired ? "🔒 Licencja wygasła" : \`⚠️ Licencja wygasa za \${daysRemaining} dni\`}
+            </div>
+            <div style={{ opacity: 0.9, lineHeight: 1.4, marginBottom: 8 }}>
+                {isExpired
+                    ? "Płatności są zablokowane. Odnów licencję, aby przywrócić możliwość przyjmowania wpłat."
+                    : "Odnów licencję, aby uniknąć przerwy w przyjmowaniu wpłat."
+                }
+            </div>
+            <button
+                onClick={onRenew}
+                style={{
+                    background: "rgba(255,255,255,0.2)",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    color: "#fff",
+                    cursor: "pointer",
+                    padding: "8px 16px",
+                    borderRadius: 20,
+                    fontSize: 13,
+                    fontWeight: 600,
+                }}
+            >
+                Odnów teraz →
+            </button>
+        </div>
     )
 }
 
@@ -229,7 +278,13 @@ function getUnusedImages(description: string, images: string[]): string[] {
     return images.filter((_, index) => !usedIndices.has(index))
 }
 
+// License API URL (separate from campaign API)
+const LICENSE_API_URL = "https://framer-donation-plugin2.vercel.app/api"
+const LICENSE_CACHE_KEY = "donations_plugin_license"
+const LICENSE_CHECK_INTERVAL = 24 * 60 * 60 * 1000 // 24 hours
+
 export default function DonationWidget({
+    licenseKey = "",
     campaignId = "",
     apiUrl = "",
     // Visibility
@@ -289,9 +344,66 @@ export default function DonationWidget({
     const [updateAvailable, setUpdateAvailable] = useState<VersionInfo | null>(null)
     const [updateDismissed, setUpdateDismissed] = useState(false)
 
+    // License state
+    const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | null>(null)
+    const [licenseChecked, setLicenseChecked] = useState(false)
+
+    // Check if we're in Framer editor
+    const isFramerEditor = typeof window !== "undefined" && (
+        window.location.hostname.includes("framer.website") === false &&
+        window.location.hostname.includes("framer.app") ||
+        window.location.hostname === "localhost" ||
+        window.parent !== window
+    )
+
     const scrollToForm = () => {
         formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
     }
+
+    // License verification
+    useEffect(() => {
+        if (!licenseKey) {
+            setLicenseStatus({ valid: false, status: "not_found", message: "Brak klucza licencyjnego" })
+            setLicenseChecked(true)
+            return
+        }
+
+        // Check cache first
+        const cached = localStorage.getItem(LICENSE_CACHE_KEY)
+        if (cached) {
+            try {
+                const { status, checkedAt, key } = JSON.parse(cached)
+                if (key === licenseKey && Date.now() - checkedAt < LICENSE_CHECK_INTERVAL) {
+                    setLicenseStatus(status)
+                    setLicenseChecked(true)
+                    return
+                }
+            } catch {}
+        }
+
+        // Fetch from API
+        fetch(\`\${LICENSE_API_URL}/license/verify\`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key: licenseKey, domain: window.location.hostname }),
+        })
+            .then(r => r.json())
+            .then((status: LicenseStatus) => {
+                setLicenseStatus(status)
+                setLicenseChecked(true)
+                // Cache result
+                localStorage.setItem(LICENSE_CACHE_KEY, JSON.stringify({
+                    status,
+                    checkedAt: Date.now(),
+                    key: licenseKey,
+                }))
+            })
+            .catch(() => {
+                // On error, allow widget to work (fail open)
+                setLicenseStatus({ valid: true, status: "active" })
+                setLicenseChecked(true)
+            })
+    }, [licenseKey])
 
     useEffect(() => {
         if (!campaignId || !apiUrl) {
@@ -315,17 +427,7 @@ export default function DonationWidget({
 
     // Check for updates - only in Framer editor, not on published site
     useEffect(() => {
-        if (!apiUrl) return
-
-        // Detect if we're in Framer editor (canvas preview)
-        const isFramerEditor = typeof window !== "undefined" && (
-            window.location.hostname.includes("framer.website") === false &&
-            window.location.hostname.includes("framer.app") ||
-            window.location.hostname === "localhost" ||
-            window.parent !== window // iframe = editor preview
-        )
-
-        if (!isFramerEditor) return
+        if (!apiUrl || !isFramerEditor) return
 
         fetch(\`\${apiUrl}/version\`)
             .then(r => r.json())
@@ -388,6 +490,38 @@ export default function DonationWidget({
         handleDonate(buttonAmount)
     }
 
+    // License locked state
+    const isLicenseLocked = licenseChecked && (!licenseStatus?.valid || licenseStatus?.status === "locked" || licenseStatus?.status === "expired")
+    const isLicenseExpiring = licenseChecked && licenseStatus?.valid && licenseStatus?.daysRemaining && licenseStatus.daysRemaining <= 7
+
+    // Handle renew button click
+    const handleRenew = () => {
+        window.open("https://framer-donation-plugin2.vercel.app/dashboard/settings/billing", "_blank")
+    }
+
+    if (!licenseKey) {
+        return (
+            <div style={{
+                padding: 40,
+                textAlign: "center",
+                color: "#999",
+                fontFamily: "Inter, sans-serif",
+                background: "#f9f9f9",
+                borderRadius,
+            }}>
+                <div style={{ marginBottom: 12, fontSize: 14 }}>🔑 Wprowadź klucz licencyjny</div>
+                <a
+                    href="https://framer-donation-plugin2.vercel.app"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ color: primaryColor, fontSize: 13 }}
+                >
+                    Nie masz klucza? Kup tutaj →
+                </a>
+            </div>
+        )
+    }
+
     if (!campaignId || !apiUrl) {
         return (
             <div style={{
@@ -446,6 +580,14 @@ export default function DonationWidget({
             maxWidth: 450,
             overflow: "hidden",
         }}>
+            {/* License Expiring/Expired Banner - only in Framer editor */}
+            {isFramerEditor && (isLicenseLocked || isLicenseExpiring) && (
+                <LicenseExpiredBanner
+                    daysRemaining={licenseStatus?.daysRemaining}
+                    onRenew={handleRenew}
+                />
+            )}
+
             {/* Update Banner */}
             {updateAvailable && !updateDismissed && (
                 <UpdateBanner
@@ -705,20 +847,21 @@ export default function DonationWidget({
                     )}
                     <button
                         type="submit"
-                        disabled={formLoading || !currentFormAmount}
+                        disabled={formLoading || !currentFormAmount || isLicenseLocked}
                         style={{
                             width: "100%",
                             padding: "16px 24px",
-                            backgroundColor: formLoading || !currentFormAmount ? "#9ca3af" : primaryColor,
+                            backgroundColor: formLoading || !currentFormAmount || isLicenseLocked ? "#9ca3af" : primaryColor,
                             color: "#fff",
                             border: "none",
                             borderRadius: 30,
                             fontSize: 16,
                             fontWeight: 600,
-                            cursor: formLoading || !currentFormAmount ? "not-allowed" : "pointer",
+                            cursor: formLoading || !currentFormAmount || isLicenseLocked ? "not-allowed" : "pointer",
+                            opacity: isLicenseLocked ? 0.6 : 1,
                         }}
                     >
-                        {formLoading ? "Przekierowuję..." : "Wpłać"}
+                        {isLicenseLocked ? "Płatności zablokowane" : formLoading ? "Przekierowuję..." : "Wpłać"}
                     </button>
                 </form>
             )}
@@ -727,20 +870,21 @@ export default function DonationWidget({
             {showButton && (
                 <button
                     onClick={handleButtonClick}
-                    disabled={formLoading}
+                    disabled={formLoading || isLicenseLocked}
                     style={{
                         padding: "16px 32px",
-                        backgroundColor: formLoading ? "#9ca3af" : primaryColor,
+                        backgroundColor: formLoading || isLicenseLocked ? "#9ca3af" : primaryColor,
                         color: "#fff",
                         border: "none",
                         borderRadius: 30,
                         fontSize: 16,
                         fontWeight: 600,
-                        cursor: formLoading ? "not-allowed" : "pointer",
-                        boxShadow: \`0 4px 15px \${primaryColor}40\`,
+                        cursor: formLoading || isLicenseLocked ? "not-allowed" : "pointer",
+                        boxShadow: isLicenseLocked ? "none" : \`0 4px 15px \${primaryColor}40\`,
+                        opacity: isLicenseLocked ? 0.6 : 1,
                     }}
                 >
-                    {formLoading ? "..." : buttonText.replace("{amount}", buttonAmount.toString())}
+                    {isLicenseLocked ? "Płatności zablokowane" : formLoading ? "..." : buttonText.replace("{amount}", buttonAmount.toString())}
                 </button>
             )}
 
@@ -1005,6 +1149,7 @@ export default function DonationWidget({
 }
 
 addPropertyControls(DonationWidget, {
+    licenseKey: { type: ControlType.String, title: "🔑 License Key", placeholder: "DPL-XXXX-XXXX-XXXX", defaultValue: "" },
     campaignId: { type: ControlType.String, title: "Campaign ID", defaultValue: "" },
     apiUrl: { type: ControlType.String, title: "API URL", defaultValue: "" },
 

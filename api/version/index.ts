@@ -7,7 +7,7 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node"
 
 // Wersja pluginu - zwiększaj przy każdej aktualizacji komponentów
-export const PLUGIN_VERSION = "1.0.0"
+export const PLUGIN_VERSION = "1.0.1"
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
     res.setHeader("Access-Control-Allow-Origin", "*")
@@ -21,8 +21,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === "GET") {
         return res.status(200).json({
             version: PLUGIN_VERSION,
-            updated_at: "2025-12-12",
-            changelog: "Pierwsza wersja pluginu",
+            updated_at: "2025-12-13",
+            changelog: "Dodano system licencji i weryfikację klucza",
         })
     }
 

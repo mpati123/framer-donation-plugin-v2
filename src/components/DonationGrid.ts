@@ -32,14 +32,22 @@ interface Settings {
 }
 
 // Plugin version - must match api/version/index.ts
-const COMPONENT_VERSION = "1.0.0"
+const COMPONENT_VERSION = "1.0.1"
 
 interface VersionInfo {
     version: string
     changelog: string
 }
 
+interface LicenseStatus {
+    valid: boolean
+    status: "active" | "trial" | "expired" | "locked" | "not_found"
+    daysRemaining?: number
+    message?: string
+}
+
 interface Props {
+    licenseKey?: string
     apiUrl?: string
     campaignIds?: string
     columns?: number
@@ -87,6 +95,47 @@ function CloseIcon({ size = 24 }: { size?: number }) {
         <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M18 6L6 18M6 6l12 12"/>
         </svg>
+    )
+}
+
+function LicenseExpiredBanner({ daysRemaining, onRenew }: { daysRemaining?: number; onRenew: () => void }) {
+    const isExpired = !daysRemaining || daysRemaining <= 0
+
+    return (
+        <div style={{
+            background: isExpired ? "linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)" : "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+            color: "#fff",
+            padding: "12px 16px",
+            borderRadius: 8,
+            marginBottom: 16,
+            fontSize: 13,
+            boxShadow: isExpired ? "0 2px 8px rgba(220, 38, 38, 0.3)" : "0 2px 8px rgba(245, 158, 11, 0.3)",
+        }}>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>
+                {isExpired ? "🔒 Licencja wygasła" : \`⚠️ Licencja wygasa za \${daysRemaining} dni\`}
+            </div>
+            <div style={{ opacity: 0.9, lineHeight: 1.4, marginBottom: 8 }}>
+                {isExpired
+                    ? "Płatności są zablokowane. Odnów licencję, aby przywrócić możliwość przyjmowania wpłat."
+                    : "Odnów licencję, aby uniknąć przerwy w przyjmowaniu wpłat."
+                }
+            </div>
+            <button
+                onClick={onRenew}
+                style={{
+                    background: "rgba(255,255,255,0.2)",
+                    border: "1px solid rgba(255,255,255,0.4)",
+                    color: "#fff",
+                    cursor: "pointer",
+                    padding: "8px 16px",
+                    borderRadius: 20,
+                    fontSize: 13,
+                    fontWeight: 600,
+                }}
+            >
+                Odnów teraz →
+            </button>
+        </div>
     )
 }
 
@@ -213,7 +262,13 @@ function getUnusedImages(description: string, images: string[]): string[] {
     return images.filter((_, index) => !usedIndices.has(index))
 }
 
+// License API URL
+const LICENSE_API_URL = "https://framer-donation-plugin2.vercel.app/api"
+const LICENSE_CACHE_KEY = "donations_plugin_license_grid"
+const LICENSE_CHECK_INTERVAL = 24 * 60 * 60 * 1000
+
 export default function DonationGrid({
+    licenseKey = "",
     apiUrl = "",
     campaignIds = "",
     columns = 2,
@@ -260,6 +315,67 @@ export default function DonationGrid({
     // Version check state
     const [updateAvailable, setUpdateAvailable] = useState<VersionInfo | null>(null)
     const [updateDismissed, setUpdateDismissed] = useState(false)
+
+    // License state
+    const [licenseStatus, setLicenseStatus] = useState<LicenseStatus | null>(null)
+    const [licenseChecked, setLicenseChecked] = useState(false)
+
+    // Check if we're in Framer editor
+    const isFramerEditor = typeof window !== "undefined" && (
+        window.location.hostname.includes("framer.website") === false &&
+        window.location.hostname.includes("framer.app") ||
+        window.location.hostname === "localhost" ||
+        window.parent !== window
+    )
+
+    // License verification
+    useEffect(() => {
+        if (!licenseKey) {
+            setLicenseStatus({ valid: false, status: "not_found", message: "Brak klucza licencyjnego" })
+            setLicenseChecked(true)
+            return
+        }
+
+        const cached = localStorage.getItem(LICENSE_CACHE_KEY)
+        if (cached) {
+            try {
+                const { status, checkedAt, key } = JSON.parse(cached)
+                if (key === licenseKey && Date.now() - checkedAt < LICENSE_CHECK_INTERVAL) {
+                    setLicenseStatus(status)
+                    setLicenseChecked(true)
+                    return
+                }
+            } catch {}
+        }
+
+        fetch(\`\${LICENSE_API_URL}/license/verify\`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key: licenseKey, domain: window.location.hostname }),
+        })
+            .then(r => r.json())
+            .then((status: LicenseStatus) => {
+                setLicenseStatus(status)
+                setLicenseChecked(true)
+                localStorage.setItem(LICENSE_CACHE_KEY, JSON.stringify({
+                    status,
+                    checkedAt: Date.now(),
+                    key: licenseKey,
+                }))
+            })
+            .catch(() => {
+                setLicenseStatus({ valid: true, status: "active" })
+                setLicenseChecked(true)
+            })
+    }, [licenseKey])
+
+    // License locked state
+    const isLicenseLocked = licenseChecked && (!licenseStatus?.valid || licenseStatus?.status === "locked" || licenseStatus?.status === "expired")
+    const isLicenseExpiring = licenseChecked && licenseStatus?.valid && licenseStatus?.daysRemaining && licenseStatus.daysRemaining <= 7
+
+    const handleRenew = () => {
+        window.open("https://framer-donation-plugin2.vercel.app/dashboard/settings/billing", "_blank")
+    }
 
     useEffect(() => {
         if (!apiUrl) {
@@ -1074,6 +1190,13 @@ export default function DonationGrid({
 }
 
 addPropertyControls(DonationGrid, {
+    licenseKey: {
+        type: ControlType.String,
+        title: "🔑 Klucz licencji",
+        placeholder: "DPL-XXXX-XXXX-XXXX",
+        defaultValue: "",
+        description: "Wprowadź klucz licencji aby aktywować widget"
+    },
     apiUrl: { type: ControlType.String, title: "API URL", defaultValue: "" },
     campaignIds: { type: ControlType.String, title: "Campaign IDs", defaultValue: "", description: "Wklej ID zbiórek oddzielone przecinkami" },
     columns: { type: ControlType.Number, title: "Kolumny", defaultValue: 2, min: 1, max: 4, step: 1 },
