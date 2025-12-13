@@ -162,7 +162,7 @@ export default async function handler(
     // Create Stripe Checkout Session
     const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
-      payment_method_types: ["card", "blik", "p24"],
+      payment_method_types: ["card", "p24"],
       line_items: [
         {
           price: PRICE_IDS[plan],
