@@ -70,6 +70,7 @@ export default async function handler(
       .single();
 
     if (error || !license) {
+      console.log("License lookup failed:", { key: key.toUpperCase().trim(), error });
       return res.status(200).json({
         valid: false,
         status: "not_found",
