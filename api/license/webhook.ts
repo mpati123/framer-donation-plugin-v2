@@ -186,7 +186,7 @@ export default async function handler(
           }
 
           // At this point org is guaranteed to exist
-          const organizationId = org.id;
+          const organizationId = org!.id;
 
           // Get subscription details
           const subscription = await stripe.subscriptions.retrieve(
